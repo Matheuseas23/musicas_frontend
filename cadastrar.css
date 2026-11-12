@@ -335,6 +335,38 @@ input:focus {
     box-shadow: 0 0 0 4px rgba(var(--roxo), 0.28), 0 0 26px rgba(var(--roxo), 0.3);
 }
 
+/* Aviso do iTunes embaixo do Título (extra) */
+.aviso-itunes {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 2px 0 0;
+    color: var(--texto-2);
+    font-size: 0.85rem;
+    animation: surgir 0.4s var(--mola) backwards;
+}
+
+.aviso-itunes:empty {
+    display: none;
+}
+
+.aviso-itunes img {
+    width: 40px;
+    height: 40px;
+    flex: none;
+    border-radius: 10px;
+    object-fit: cover;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.aviso-itunes.achou {
+    color: #b9f5cf;
+}
+
+.aviso-itunes.nao-achou {
+    color: #ffc4c4;
+}
+
 /* Botão principal na largura toda */
 .painel button {
     min-height: 54px;
