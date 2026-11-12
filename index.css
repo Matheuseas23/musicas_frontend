@@ -26,6 +26,7 @@
              "Segoe UI Variable Display", "Segoe UI", Roboto, system-ui, sans-serif;
     --topo: calc(env(safe-area-inset-top, 0px) + 14px);   /* espaço acima da barra (notch do iPhone) */
     --altura-barra: 66px;
+    --atraso: 2.9s;   /* o título e os cards entram depois da abertura */
 }
 
 * {
@@ -112,6 +113,123 @@ button:focus-visible {
 
 @keyframes mancha-2 {
     to { transform: translate(-65vw, -71.5vh) scale(0.9); }
+}
+
+/* ---------- Abertura (só na página inicial) ----------
+   Tela preta; uma bolha de vidro cresce com borda de arco-íris; a logo aparece por dentro
+   dela, entortada e com as cores separadas (filtro #lente do HTML), fica nítida e voa para o canto. */
+.abertura {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    overflow: hidden;
+    background: #000;
+    animation: abertura-some 0.6s ease 2.75s forwards;
+}
+
+.abertura-bolha,
+.abertura-logo {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+}
+
+/* Bolha de vidro com borda de arco-íris */
+.abertura-bolha {
+    width: min(72vmin, 320px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0) 58%, rgba(255, 255, 255, 0.09) 68%, rgba(255, 255, 255, 0) 71%);
+    box-shadow: inset 0 0 36px rgba(255, 255, 255, 0.16), inset 0 0 3px rgba(255, 255, 255, 0.55), 0 0 70px rgba(124, 140, 255, 0.28);
+    opacity: 0;
+    scale: 0.12;
+    animation: bolha 2s var(--mola) 0.3s forwards;
+}
+
+.abertura-bolha::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #ff5f7e, #ffd166, #3ddc97, #4cc9f0, #8b5cf6, #ff5f7e);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 3px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 3px));
+    filter: blur(1.5px);
+    opacity: 0.85;
+    animation: girar 2.3s linear 0.3s;
+}
+
+/* A logo da nota musical */
+.abertura-logo {
+    --canto: 56px;     /* tamanho da logo fixa no canto */
+    --canto-y: 7px;
+    --escala: 0.28;    /* 56 ÷ 200 */
+    width: 200px;
+    height: 200px;
+    border-radius: 22%;
+    overflow: hidden;
+    opacity: 0;
+    scale: 0.6;
+    animation:
+        logo-surge 1.2s var(--mola) 0.6s forwards,
+        logo-canto 0.7s cubic-bezier(0.6, 0, 0.2, 1) 2.55s forwards;
+}
+
+.abertura-logo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    filter: url(#lente);
+}
+
+/* Reflexo de luz passando pela logo */
+.abertura-logo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.32) 50%, transparent 65%);
+    translate: -110% 0;
+    animation: reflexo 0.8s ease-in-out 1.75s forwards;
+}
+
+/* A logo fixa do canto aparece quando a da abertura chega lá */
+.logo {
+    animation: aparecer 0.15s ease 3.2s backwards;
+}
+
+@keyframes bolha {
+    0%   { opacity: 0; scale: 0.12; }
+    20%  { opacity: 1; }
+    55%  { opacity: 1; scale: 1; }
+    100% { opacity: 0; scale: 1.45; }
+}
+
+@keyframes girar {
+    to { rotate: 360deg; }
+}
+
+@keyframes logo-surge {
+    0%   { opacity: 0; scale: 0.6; }
+    35%  { opacity: 1; }
+    70%  { scale: 1.06; }
+    100% { opacity: 1; scale: 1; }
+}
+
+@keyframes logo-canto {
+    to {
+        left: calc(max(16px, env(safe-area-inset-left, 0px)) + var(--canto) / 2);
+        top: calc(var(--topo) + var(--canto-y) + var(--canto) / 2);
+        scale: var(--escala);
+    }
+}
+
+@keyframes reflexo {
+    to { translate: 110% 0; }
+}
+
+@keyframes abertura-some {
+    to { background-color: transparent; visibility: hidden; }
 }
 
 /* ---------- Barra do topo em vidro (o "margin top" do iPhone) ---------- */
@@ -230,7 +348,7 @@ button:focus-visible {
     gap: 22px;
     padding-top: calc(var(--topo) + var(--altura-barra) + 48px);
     text-align: center;
-    animation: surgir 1s var(--mola) 0.1s backwards;
+    animation: surgir 1s var(--mola) calc(var(--atraso) + 0.1s) backwards;
 }
 
 .marca p,
@@ -283,7 +401,7 @@ main {
     -webkit-backdrop-filter: blur(16px) saturate(170%);
     backdrop-filter: blur(16px) saturate(170%);
     transition: transform 0.35s var(--mola), background-color 0.35s, border-color 0.35s, box-shadow 0.35s;
-    animation: surgir 0.7s var(--mola) 0.25s backwards;
+    animation: surgir 0.7s var(--mola) calc(var(--atraso) + 0.25s) backwards;
 }
 
 /* Brilho de luz no vidro */
@@ -301,15 +419,15 @@ main {
 }
 
 /* Cada card aparece um pouco depois do anterior */
-.musica:nth-child(2) { animation-delay: 0.32s; }
-.musica:nth-child(3) { animation-delay: 0.39s; }
-.musica:nth-child(4) { animation-delay: 0.46s; }
-.musica:nth-child(5) { animation-delay: 0.53s; }
-.musica:nth-child(6) { animation-delay: 0.6s; }
-.musica:nth-child(7) { animation-delay: 0.67s; }
-.musica:nth-child(8) { animation-delay: 0.74s; }
-.musica:nth-child(9) { animation-delay: 0.81s; }
-.musica:nth-child(n+10) { animation-delay: 0.88s; }
+.musica:nth-child(2) { animation-delay: calc(var(--atraso) + 0.32s); }
+.musica:nth-child(3) { animation-delay: calc(var(--atraso) + 0.39s); }
+.musica:nth-child(4) { animation-delay: calc(var(--atraso) + 0.46s); }
+.musica:nth-child(5) { animation-delay: calc(var(--atraso) + 0.53s); }
+.musica:nth-child(6) { animation-delay: calc(var(--atraso) + 0.6s); }
+.musica:nth-child(7) { animation-delay: calc(var(--atraso) + 0.67s); }
+.musica:nth-child(8) { animation-delay: calc(var(--atraso) + 0.74s); }
+.musica:nth-child(9) { animation-delay: calc(var(--atraso) + 0.81s); }
+.musica:nth-child(n+10) { animation-delay: calc(var(--atraso) + 0.88s); }
 
 .musica h2 {
     grid-area: titulo;
@@ -536,6 +654,12 @@ main {
         height: 48px;
     }
 
+    .abertura-logo {
+        --canto: 48px;
+        --canto-y: 11px;
+        --escala: 0.24;   /* 48 ÷ 200 */
+    }
+
     main {
         margin-top: 36px;
     }
@@ -632,5 +756,10 @@ main {
 
     @view-transition {
         navigation: none;
+    }
+
+    /* Sem animações, não há abertura: o site aparece direto */
+    .abertura {
+        display: none !important;
     }
 }
