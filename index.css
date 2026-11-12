@@ -574,6 +574,39 @@ main {
     50%      { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 0 0 8px rgba(var(--roxo), 0), 0 0 34px rgba(var(--roxo), 0.75); }
 }
 
+/* Música tocando: a linha entre as informações e os botões vira ondas sonoras.
+   Barrinhas lilás recortadas por um desenho de onda (máscara SVG) que anda para o lado. */
+.acoes::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -11px;
+    height: 22px;
+    background: repeating-linear-gradient(90deg, rgba(205, 189, 255, 0.95) 0 3px, transparent 3px 6px);
+    -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 22'><path fill='white' d='M0 9 L10 4 L20 8 L30 1 L40 7 L50 3 L60 9 L70 5 L80 2 L90 8 L100 4 L110 7 L120 9 L120 13 L110 15 L100 18 L90 14 L80 20 L70 17 L60 13 L50 19 L40 15 L30 21 L20 14 L10 18 L0 13 Z'/></svg>") repeat-x 0 50% / 120px 22px;
+    mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 22'><path fill='white' d='M0 9 L10 4 L20 8 L30 1 L40 7 L50 3 L60 9 L70 5 L80 2 L90 8 L100 4 L110 7 L120 9 L120 13 L110 15 L100 18 L90 14 L80 20 L70 17 L60 13 L50 19 L40 15 L30 21 L20 14 L10 18 L0 13 Z'/></svg>") repeat-x 0 50% / 120px 22px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+
+.musica.tocando .acoes {
+    border-top-color: transparent;
+}
+
+.musica.tocando .acoes::before {
+    opacity: 1;
+    animation: ondas 1.1s linear infinite;
+}
+
+@keyframes ondas {
+    to {
+        -webkit-mask-position: -120px 50%;
+        mask-position: -120px 50%;
+    }
+}
+
 /* Música não achada no iTunes: fica sem foto e a animação de carregando para */
 .capa.sem-capa::before,
 .capa.sem-capa::after {

@@ -188,6 +188,7 @@ function tocarTrecho(botao, endereco) {
     audio.play()
     botaoTocando = botao
     botao.classList.add("tocando")
+    botao.closest(".musica").classList.add("tocando")   // a linha do card vira ondas sonoras
     botao.setAttribute("aria-pressed", "true")
     botao.innerHTML = iconePausar
 }
@@ -196,6 +197,7 @@ function pararTrecho() {
     audio.pause()
     if (botaoTocando) {
         botaoTocando.classList.remove("tocando")
+        botaoTocando.closest(".musica").classList.remove("tocando")
         botaoTocando.setAttribute("aria-pressed", "false")
         botaoTocando.innerHTML = iconeTocar
     }
