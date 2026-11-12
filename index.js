@@ -1,7 +1,7 @@
 // ===== Etapa 6: listar as músicas do banco =====
 
 // Em desenvolvimento, o frontend conversa com o backend do computador
-const urlBackend = "http://localhost:3000"
+const urlBackend = "https://musicas-backend-delta.vercel.app"
 
 const listaMusicas = document.getElementById("listaMusicas")
 
