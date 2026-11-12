@@ -19,7 +19,7 @@ async function buscarMusicas() {
                 <button class="tocar" type="button" aria-label="Tocar 30 segundos de ${musica.titulo}">${iconeTocar}</button>
                 <div class="acoes">
                     <a class="editar" href="editar.html?id=${musica.id}">Editar</a>
-                    <button class="apagar">Apagar</button>
+                    <button class="apagar" onclick="apagarMusica(${musica.id})">Apagar</button>
                 </div>
             </article>
         `
@@ -29,6 +29,23 @@ async function buscarMusicas() {
 }
 
 buscarMusicas()
+
+
+// ===== Etapa 8: apagar uma música =====
+
+async function apagarMusica(id) {
+    const confirmou = confirm("Tem certeza que quer apagar essa música?")
+
+    if (!confirmou) {
+        return
+    }
+
+    const resposta = await fetch(`${urlBackend}/apagar/${id}`, { method: "DELETE" })
+    const dados = await resposta.json()
+    alert(dados.mensagem)
+
+    window.location.reload()
+}
 
 
 // ===== Extra do Matheus: capa e trecho de 30 segundos do iTunes =====
