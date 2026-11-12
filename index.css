@@ -26,7 +26,7 @@
              "Segoe UI Variable Display", "Segoe UI", Roboto, system-ui, sans-serif;
     --topo: calc(env(safe-area-inset-top, 0px) + 14px);   /* espaço acima da barra (notch do iPhone) */
     --altura-barra: 66px;
-    --atraso: 2.9s;   /* o título e os cards entram depois da abertura */
+    --atraso: 2.6s;   /* o título e os cards entram enquanto o site entra em foco */
 }
 
 * {
@@ -117,14 +117,17 @@ button:focus-visible {
 
 /* ---------- Abertura (só na página inicial) ----------
    Tela preta; uma bolha de vidro cresce com borda de arco-íris; a logo aparece por dentro
-   dela, entortada e com as cores separadas (filtro #lente do HTML), fica nítida e voa para o canto. */
+   dela, entortada e com as cores separadas (filtro #lente do HTML), fica nítida e some num
+   fade out com desfoque, enquanto o site aparece saindo do desfoque para o foco. */
 .abertura {
     position: fixed;
     inset: 0;
     z-index: 100;
     overflow: hidden;
     background: #000;
-    animation: abertura-some 0.6s ease 2.75s forwards;
+    -webkit-backdrop-filter: blur(24px);   /* o site por trás aparece desfocado e entra em foco */
+    backdrop-filter: blur(24px);
+    animation: abertura-some 0.9s ease 2.5s forwards;
 }
 
 .abertura-bolha,
@@ -162,9 +165,6 @@ button:focus-visible {
 
 /* A logo da nota musical */
 .abertura-logo {
-    --canto: 56px;     /* tamanho da logo fixa no canto */
-    --canto-y: 7px;
-    --escala: 0.28;    /* 56 ÷ 200 */
     width: 200px;
     height: 200px;
     border-radius: 22%;
@@ -173,7 +173,7 @@ button:focus-visible {
     scale: 0.6;
     animation:
         logo-surge 1.2s var(--mola) 0.6s forwards,
-        logo-canto 0.7s cubic-bezier(0.6, 0, 0.2, 1) 2.55s forwards;
+        logo-sai 0.7s ease-in 2.4s forwards;
 }
 
 .abertura-logo img {
@@ -193,9 +193,9 @@ button:focus-visible {
     animation: reflexo 0.8s ease-in-out 1.75s forwards;
 }
 
-/* A logo fixa do canto aparece quando a da abertura chega lá */
+/* A logo fixa do canto entra em foco junto com o site */
 .logo {
-    animation: aparecer 0.15s ease 3.2s backwards;
+    animation: foco 0.7s ease 2.7s backwards;
 }
 
 @keyframes bolha {
@@ -216,12 +216,15 @@ button:focus-visible {
     100% { opacity: 1; scale: 1; }
 }
 
-@keyframes logo-canto {
-    to {
-        left: calc(max(16px, env(safe-area-inset-left, 0px)) + var(--canto) / 2);
-        top: calc(var(--topo) + var(--canto-y) + var(--canto) / 2);
-        scale: var(--escala);
-    }
+/* Fade out com desfoque */
+@keyframes logo-sai {
+    from { opacity: 1; scale: 1; filter: blur(0); }
+    to   { opacity: 0; scale: 1.18; filter: blur(16px); }
+}
+
+/* Do desfoque para o foco */
+@keyframes foco {
+    from { opacity: 0; filter: blur(12px); }
 }
 
 @keyframes reflexo {
@@ -229,7 +232,12 @@ button:focus-visible {
 }
 
 @keyframes abertura-some {
-    to { background-color: transparent; visibility: hidden; }
+    to {
+        background-color: transparent;
+        -webkit-backdrop-filter: blur(0);
+        backdrop-filter: blur(0);
+        visibility: hidden;
+    }
 }
 
 /* ---------- Barra do topo em vidro (o "margin top" do iPhone) ---------- */
@@ -653,13 +661,6 @@ main {
         width: 48px;
         height: 48px;
     }
-
-    .abertura-logo {
-        --canto: 48px;
-        --canto-y: 11px;
-        --escala: 0.24;   /* 48 ÷ 200 */
-    }
-
     main {
         margin-top: 36px;
     }
