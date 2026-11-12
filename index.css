@@ -1,0 +1,572 @@
+/* ==========================================================
+   Minhas Músicas · index.css (página da lista)
+   Visual: Liquid Glass do iOS 26 sobre fundo preto arroxeado.
+   O efeito d'água usa o filtro SVG #agua, que está no HTML.
+   ========================================================== */
+
+/* ---------- Cores, fontes e medidas ---------- */
+:root {
+    color-scheme: dark;
+    --fundo: #09060f;                       /* preto arroxeado */
+    --texto: #f5f1fb;
+    --texto-2: rgba(245, 241, 251, 0.74);   /* artista */
+    --texto-3: rgba(245, 241, 251, 0.56);   /* detalhes */
+    --lilas: #cdbdff;                       /* item ativo da barra */
+    --roxo: 139, 92, 246;                   /* mancha 1 da animação aprovada */
+    --roxo-escuro: 107, 33, 168;            /* mancha 2 da animação aprovada */
+    --vermelho: 255, 107, 107;
+    --vidro: rgba(255, 255, 255, 0.075);
+    --vidro-borda: rgba(255, 255, 255, 0.16);
+    --brilho: inset 0 1px 0 rgba(255, 255, 255, 0.3),
+              inset 0 -1px 0 rgba(255, 255, 255, 0.06),
+              inset 0 0 24px rgba(255, 255, 255, 0.035);
+    --sombra: 0 18px 44px rgba(0, 0, 0, 0.38);
+    --mola: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --fonte: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+             "Segoe UI Variable Display", "Segoe UI", Roboto, system-ui, sans-serif;
+    --topo: calc(env(safe-area-inset-top, 0px) + 14px);   /* espaço acima da barra (notch do iPhone) */
+    --altura-barra: 66px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 56px);
+    background: var(--fundo);
+    color: var(--texto);
+    font-family: var(--fonte);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+    background: rgba(var(--roxo), 0.45);
+}
+
+a:focus-visible,
+button:focus-visible {
+    outline: 2px solid var(--lilas);
+    outline-offset: 3px;
+}
+
+/* O SVG com o filtro da água não ocupa espaço na página */
+.filtros {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+/* ---------- Fundo animado: 2 manchas roxas desfocadas se mexendo ----------
+   É a animação do quadradinho da capa (aprovada), ampliada para a tela toda. */
+.fundo {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.fundo::before,
+.fundo::after {
+    content: "";
+    position: absolute;
+    width: 130vmax;
+    height: 130vmax;
+    border-radius: 50%;
+    will-change: transform;
+}
+
+.fundo::before {
+    left: calc(5% - 65vmax);
+    top: calc(5% - 65vmax);
+    background: radial-gradient(circle, rgba(var(--roxo), 0.8), transparent 62%);
+    opacity: 0.55;
+    animation: mancha-1 3.6s ease-in-out infinite alternate;
+}
+
+.fundo::after {
+    left: calc(95% - 65vmax);
+    top: calc(95% - 65vmax);
+    background: radial-gradient(circle, rgba(var(--roxo-escuro), 0.9), transparent 62%);
+    opacity: 0.6;
+    animation: mancha-2 4.6s ease-in-out infinite alternate;
+}
+
+@keyframes mancha-1 {
+    to { transform: translate(71.5vw, 65vh) scale(1.1); }
+}
+
+@keyframes mancha-2 {
+    to { transform: translate(-65vw, -71.5vh) scale(0.9); }
+}
+
+/* ---------- Barra do topo em vidro (o "margin top" do iPhone) ---------- */
+.barra {
+    position: fixed;
+    z-index: 10;
+    top: var(--topo);
+    left: 0;
+    right: 0;
+    width: max-content;
+    max-width: calc(100% - 32px);
+    margin-inline: auto;
+    display: flex;
+    gap: 4px;
+    padding: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: var(--brilho), 0 14px 36px rgba(0, 0, 0, 0.4);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    backdrop-filter: blur(16px) saturate(180%);
+    animation: descer 0.8s var(--mola) backwards;
+}
+
+/* Reflexo de luz na borda da barra, vindo do canto de cima, como na referência do iOS */
+.barra::after {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    background: radial-gradient(55% 95% at 90% 0%, rgba(255, 255, 255, 0.24), transparent 70%);
+    pointer-events: none;
+}
+
+.barra a {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    min-width: 84px;
+    padding: 8px 16px 7px;
+    border-radius: 999px;
+    color: rgba(245, 241, 251, 0.78);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.25s, color 0.25s, transform 0.25s var(--mola);
+}
+
+.barra svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.barra a.ativo {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.14);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 16px rgba(var(--roxo), 0.28);
+}
+
+.barra a.ativo svg {
+    stroke: var(--lilas);
+}
+
+/* ---------- Topo da página inicial: logo + "PROJETO MINHAS MÚSICAS" ---------- */
+.marca {
+    display: grid;
+    justify-items: center;
+    gap: 22px;
+    padding-top: calc(var(--topo) + var(--altura-barra) + 48px);
+    text-align: center;
+    animation: surgir 1s var(--mola) 0.1s backwards;
+}
+
+.marca img {
+    width: 88px;
+    height: 88px;
+    border-radius: 22%;   /* recorta os cantos pretos da logo */
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 14px 44px rgba(var(--roxo), 0.45);
+}
+
+.marca p,
+.marca h1 {
+    margin: 0;
+    font-size: clamp(2.3rem, 9vw, 7.25rem);
+    line-height: 0.95;
+    letter-spacing: -0.035em;
+    text-transform: uppercase;
+    text-wrap: balance;
+    color: rgba(255, 255, 255, 0.22);   /* branco com transparência */
+}
+
+.marca p {
+    font-weight: 300;
+}
+
+.marca h1 {
+    font-weight: 800;
+}
+
+/* ---------- Lista de músicas (um card embaixo do outro) ---------- */
+main {
+    max-width: 720px;
+    margin: 48px auto 0;
+}
+
+#listaMusicas {
+    display: grid;
+    gap: 14px;
+}
+
+/* Card de vidro com efeito d'água */
+.musica {
+    --capa: 76px;
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--capa) minmax(0, 1fr) auto;
+    grid-template-areas:
+        "capa  titulo   tocar"
+        "capa  artista  tocar"
+        "capa  detalhes tocar"
+        "acoes acoes    acoes";
+    column-gap: 16px;
+    padding: 16px;
+    border-radius: 28px;
+    background: var(--vidro);
+    border: 1px solid var(--vidro-borda);
+    box-shadow: var(--brilho), var(--sombra);
+    -webkit-backdrop-filter: blur(16px) saturate(170%);
+    backdrop-filter: blur(16px) saturate(170%);
+    transition: transform 0.35s var(--mola), background-color 0.35s, border-color 0.35s, box-shadow 0.35s;
+    animation: surgir 0.7s var(--mola) 0.25s backwards;
+}
+
+/* Brilho de luz no vidro */
+.musica::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(125deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0) 38%);
+    pointer-events: none;
+}
+
+.musica > * {
+    position: relative;
+}
+
+/* Cada card aparece um pouco depois do anterior */
+.musica:nth-child(2) { animation-delay: 0.32s; }
+.musica:nth-child(3) { animation-delay: 0.39s; }
+.musica:nth-child(4) { animation-delay: 0.46s; }
+.musica:nth-child(5) { animation-delay: 0.53s; }
+.musica:nth-child(6) { animation-delay: 0.6s; }
+.musica:nth-child(7) { animation-delay: 0.67s; }
+.musica:nth-child(8) { animation-delay: 0.74s; }
+.musica:nth-child(9) { animation-delay: 0.81s; }
+.musica:nth-child(n+10) { animation-delay: 0.88s; }
+
+.musica h2 {
+    grid-area: titulo;
+    align-self: end;
+    margin: 0;
+    font-size: 1.12rem;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    overflow-wrap: anywhere;
+}
+
+.artista {
+    grid-area: artista;
+    margin: 2px 0 0;
+    color: var(--texto-2);
+    font-size: 0.95rem;
+}
+
+.detalhes {
+    grid-area: detalhes;
+    align-self: start;
+    margin: 4px 0 0;
+    color: var(--texto-3);
+    font-size: 0.84rem;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Capa da música: enquanto a foto não chega, mostra a animação aprovada */
+.capa {
+    grid-area: capa;
+    align-self: center;
+    position: relative;
+    width: var(--capa);
+    height: var(--capa);
+    border-radius: 18px;
+    overflow: hidden;
+    isolation: isolate;
+    background: #130b1f;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
+}
+
+.capa::before,
+.capa::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    width: 130%;
+    height: 130%;
+    border-radius: 50%;
+    will-change: transform;
+}
+
+.capa::before {
+    top: -60%;
+    left: -60%;
+    background: radial-gradient(circle, rgba(var(--roxo), 0.8), transparent 62%);
+    animation: capa-1 3.6s ease-in-out infinite alternate;
+}
+
+.capa::after {
+    bottom: -60%;
+    right: -60%;
+    background: radial-gradient(circle, rgba(var(--roxo-escuro), 0.9), transparent 62%);
+    animation: capa-2 4.6s ease-in-out infinite alternate;
+}
+
+@keyframes capa-1 {
+    to { transform: translate(55%, 50%) scale(1.1); }
+}
+
+@keyframes capa-2 {
+    to { transform: translate(-50%, -55%) scale(0.9); }
+}
+
+/* A foto da capa (entra na etapa 6) cobre a animação */
+.capa img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    animation: aparecer 0.5s ease backwards;
+}
+
+/* Botão redondo de tocar o trecho de 30 segundos */
+.tocar {
+    grid-area: tocar;
+    align-self: center;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 6px 18px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: transform 0.25s var(--mola), background-color 0.25s, box-shadow 0.25s;
+}
+
+.tocar svg {
+    width: 18px;
+    height: 18px;
+    margin-left: 3px;
+    fill: currentColor;
+}
+
+.tocar:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+/* Editar (pílula roxa) e Apagar (pílula vermelha) */
+.acoes {
+    grid-area: acoes;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.editar,
+.apagar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 20px;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    transition: transform 0.25s var(--mola), background-color 0.25s, box-shadow 0.25s;
+}
+
+.editar {
+    color: #e6dcff;
+    background: rgba(var(--roxo), 0.14);
+    border: 1px solid rgba(var(--roxo), 0.7);
+}
+
+.apagar {
+    color: #ffc4c4;
+    background: rgba(var(--vermelho), 0.1);
+    border: 1px solid rgba(var(--vermelho), 0.6);
+}
+
+/* ---------- Animações ao passar o mouse e ao clicar ---------- */
+@media (hover: hover) {
+    .barra a:hover {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.09);
+    }
+
+    .barra a.ativo:hover {
+        background: rgba(255, 255, 255, 0.16);
+    }
+
+    .musica:hover {
+        transform: translateY(-3px);
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.26);
+        box-shadow: var(--brilho), 0 26px 56px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(var(--roxo), 0.18);
+    }
+
+    .tocar:not(:disabled):hover {
+        transform: scale(1.07);
+        background: rgba(var(--roxo), 0.45);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 0 26px rgba(var(--roxo), 0.55);
+    }
+
+    .editar:hover {
+        transform: translateY(-1px);
+        background: rgba(var(--roxo), 0.28);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 6px 20px rgba(var(--roxo), 0.35);
+    }
+
+    .apagar:hover {
+        transform: translateY(-1px);
+        background: rgba(var(--vermelho), 0.2);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 6px 20px rgba(var(--vermelho), 0.25);
+    }
+}
+
+.barra a:active {
+    transform: scale(0.94);
+}
+
+.tocar:not(:disabled):active {
+    transform: scale(0.92);
+}
+
+.editar:active,
+.apagar:active {
+    transform: scale(0.96);
+}
+
+@keyframes surgir {
+    from { opacity: 0; transform: translateY(20px) scale(0.98); }
+}
+
+@keyframes descer {
+    from { opacity: 0; transform: translateY(-16px) scale(0.96); }
+}
+
+@keyframes aparecer {
+    from { opacity: 0; }
+}
+
+/* ---------- Celular ---------- */
+@media (max-width: 480px) {
+    .marca {
+        gap: 18px;
+        padding-top: calc(var(--topo) + var(--altura-barra) + 36px);
+    }
+
+    .marca img {
+        width: 72px;
+        height: 72px;
+    }
+
+    main {
+        margin-top: 36px;
+    }
+
+    .musica {
+        --capa: 64px;
+        column-gap: 12px;
+        padding: 14px;
+        border-radius: 24px;
+    }
+
+    .musica h2 {
+        font-size: 1.02rem;
+    }
+
+    .tocar {
+        width: 44px;
+        height: 44px;
+    }
+
+    .barra a {
+        min-width: 76px;
+        padding-inline: 12px;
+    }
+}
+
+/* ---------- Efeito d'água (Chrome e Edge) ----------
+   Safari e Firefox não distorcem o fundo do vidro: lá fica o vidro fosco normal. */
+@supports (not (font: -apple-system-body)) and (not (-moz-appearance: none)) {
+    .barra,
+    .musica {
+        backdrop-filter: url(#agua) blur(2px) saturate(180%);
+    }
+}
+
+/* Navegador sem vidro: fundo mais fechado para o texto continuar legível */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .barra,
+    .musica {
+        background: rgba(28, 19, 42, 0.92);
+    }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .barra,
+    .musica {
+        background: #1b1328;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+}
+
+/* Quem desligou as animações no sistema vê tudo parado */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}

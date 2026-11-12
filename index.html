@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#09060f">
+    <title>Minhas Músicas</title>
+    <meta name="description" content="Minhas Músicas: lista de músicas com capa e trecho de 30 segundos, no visual Liquid Glass do iPhone.">
+    <link rel="icon" href="itunes.jpeg" type="image/jpeg">
+    <link rel="apple-touch-icon" href="itunes.jpeg">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <!-- Filtro da água do Liquid Glass (iOS 26): o CSS usa ele no vidro -->
+    <svg class="filtros" aria-hidden="true" focusable="false">
+        <filter id="agua" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.009 0.014" numOctaves="2" seed="11" result="ruido" />
+            <feGaussianBlur in="ruido" stdDeviation="1.5" result="ondas" />
+            <feDisplacementMap in="SourceGraphic" in2="ondas" scale="42" xChannelSelector="R" yChannelSelector="B" />
+        </filter>
+    </svg>
+
+    <!-- Fundo animado: 2 manchas roxas desfocadas se mexendo -->
+    <div class="fundo" aria-hidden="true"></div>
+
+    <header>
+        <nav class="barra" aria-label="Navegação">
+            <a class="ativo" href="index.html" aria-current="page">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.2 12 4l8 6.2V19a1.5 1.5 0 0 1-1.5 1.5H15v-5.5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5.5H5.5A1.5 1.5 0 0 1 4 19z" /></svg>
+                <span>Início</span>
+            </a>
+            <a href="cadastrar.html">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" /><path d="M12 8.5v7M8.5 12h7" /></svg>
+                <span>Cadastrar música</span>
+            </a>
+        </nav>
+
+        <div class="marca">
+            <img src="itunes.jpeg" alt="" width="88" height="88">
+            <div class="marca-texto">
+                <p>Projeto</p>
+                <h1>Minhas Músicas</h1>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="listaMusicas" aria-label="Lista de músicas">
+            <article class="musica">
+                <div class="capa" role="img" aria-label="Capa da música"></div>
+                <h2>Evidências</h2>
+                <p class="artista">Chitãozinho e Xororó</p>
+                <p class="detalhes">Sertanejo | 1990 | 5 min</p>
+                <button class="tocar" type="button" aria-label="Tocar 30 segundos">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.52.85l10.4-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14z" /></svg>
+                </button>
+                <div class="acoes">
+                    <a class="editar" href="editar.html?id=1">Editar</a>
+                    <button class="apagar">Apagar</button>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <script src="index.js"></script>
+</body>
+</html>
