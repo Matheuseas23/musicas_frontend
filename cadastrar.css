@@ -363,6 +363,38 @@ input:focus {
     color: #b9f5cf;
 }
 
+/* O aviso vira um botão: tocar preenche os 5 campos */
+.aviso-itunes .preencher {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 8px 12px 8px 8px;
+    border-radius: 16px;
+    border: 1px solid rgba(185, 245, 207, 0.35);
+    background: rgba(185, 245, 207, 0.08);
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.25s, transform 0.25s var(--mola);
+}
+
+.aviso-itunes .preencher small {
+    display: block;
+    margin-top: 2px;
+    color: rgba(245, 241, 251, 0.6);
+    font-size: 0.78rem;
+}
+
+.aviso-itunes .preencher:hover {
+    background: rgba(185, 245, 207, 0.16);
+}
+
+.aviso-itunes .preencher:active {
+    transform: scale(0.98);
+}
+
 .aviso-itunes.nao-achou {
     color: #ffc4c4;
 }

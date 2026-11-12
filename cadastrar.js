@@ -86,9 +86,16 @@ async function procurarNoItunes() {
         const achada = dados.results.find((r) =>
             simplificar(r.trackName).startsWith(titulo) && simplificar(r.artistName).includes(artista))
 
+        ultimaAchada = achada || null
+
         if (achada) {
             avisoItunes.className = "aviso-itunes achou"
-            avisoItunes.innerHTML = `<img src="${achada.artworkUrl100}" alt=""> Encontrei no iTunes: ${achada.trackName} · ${achada.artistName}`
+            avisoItunes.innerHTML = `
+                <button type="button" class="preencher">
+                    <img src="${achada.artworkUrl100}" alt="">
+                    <span>Encontrei no iTunes: ${achada.trackName} · ${achada.artistName}
+                        <small>Toque aqui para preencher tudo</small></span>
+                </button>`
         } else {
             avisoItunes.className = "aviso-itunes nao-achou"
             avisoItunes.textContent = "Não encontrei no iTunes: a música vai ficar sem foto de capa."
@@ -108,3 +115,27 @@ function agendarBusca() {
 
 inputTitulo.addEventListener("input", agendarBusca)
 inputArtista.addEventListener("input", agendarBusca)
+
+
+// ===== Extra do Matheus: tocar no aviso preenche os 5 campos com os dados do iTunes =====
+let ultimaAchada = null
+
+function preencherComItunes() {
+    const m = ultimaAchada
+    if (!m) return
+
+    inputTitulo.value = m.trackName
+    inputArtista.value = m.artistName.replace(/ & /g, " e ")           // "Link do Zap & pluglip" vira "Link do Zap e pluglip"
+    inputGenero.value = m.primaryGenreName
+    inputAno.value = new Date(m.releaseDate).getFullYear()
+    inputDuracao.value = Math.max(1, Math.round(m.trackTimeMillis / 60000))   // minutos, arredondado
+
+    avisoItunes.className = "aviso-itunes achou"
+    avisoItunes.innerHTML = `<img src="${m.artworkUrl100}" alt=""> Preenchido com os dados do iTunes. Confira e clique em Cadastrar.`
+}
+
+avisoItunes.addEventListener("click", (evento) => {
+    if (evento.target.closest(".preencher")) {
+        preencherComItunes()
+    }
+})
