@@ -104,7 +104,8 @@ function confirmar(mensagem) {
 // A busca do iTunes é grátis, não precisa de chave e pode ser usada direto do navegador.
 // O banco e o backend não mudam: a capa e o trecho são achados pelo título e pelo artista.
 
-const iconeTocar = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.52.85l10.4-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14z" /></svg>`
+// Triângulo centralizado (só meio ponto à direita, que é o centro "visual" de um ▶)
+const iconeTocar = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5.14v13.72a1 1 0 0 0 1.52.85l10.4-6.86a1 1 0 0 0 0-1.7L7.92 4.29A1 1 0 0 0 6.4 5.14z" /></svg>`
 const iconePausar = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" /></svg>`
 
 // Capas escolhidas pelo Matheus que o iTunes do Brasil não tem

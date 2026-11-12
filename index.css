@@ -555,7 +555,6 @@ main {
 .tocar svg {
     width: 18px;
     height: 18px;
-    margin-left: 3px;
     fill: currentColor;
 }
 
@@ -568,10 +567,6 @@ main {
 .tocar.tocando {
     background: rgba(var(--roxo), 0.55);
     animation: pulsar 1.6s ease-in-out infinite;
-}
-
-.tocar.tocando svg {
-    margin-left: 0;
 }
 
 @keyframes pulsar {
