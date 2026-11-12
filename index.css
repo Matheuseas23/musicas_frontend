@@ -240,6 +240,19 @@ button:focus-visible {
     }
 }
 
+/* Já abriu o site nesta visita (o index.js põe a classe "ja-abriu"): sem abertura e sem espera */
+.ja-abriu {
+    --atraso: 0s;
+}
+
+.ja-abriu .abertura {
+    display: none;
+}
+
+.ja-abriu .logo {
+    animation: none;
+}
+
 /* ---------- Barra do topo em vidro (o "margin top" do iPhone) ---------- */
 .barra {
     position: fixed;

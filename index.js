@@ -134,3 +134,16 @@ function pararTrecho() {
 
 // O trecho acaba sozinho nos 30 segundos
 audio.addEventListener("ended", pararTrecho)
+
+
+// ===== Extra do Matheus: a abertura só aparece quando o site é aberto =====
+// Voltando para a página inicial durante a visita, ela não aparece de novo.
+// (sessionStorage dura enquanto a aba estiver aberta; fechou e abriu o site de novo, a abertura volta)
+try {
+    if (sessionStorage.getItem("abriuSite")) {
+        document.documentElement.classList.add("ja-abriu")
+    }
+    sessionStorage.setItem("abriuSite", "sim")
+} catch (error) {
+    console.log(error)
+}
