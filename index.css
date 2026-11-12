@@ -684,6 +684,104 @@ main {
     from { opacity: 0; }
 }
 
+/* ---------- Caixas de aviso em Liquid Glass (no lugar do alert e do confirm) ---------- */
+.caixa-fundo {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: grid;
+    place-items: center;
+    padding: 24px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px));
+    background: rgba(5, 3, 10, 0.5);
+    animation: caixa-fade 0.2s ease;
+    transition: opacity 0.2s;
+}
+
+.caixa-fundo.saindo {
+    opacity: 0;
+}
+
+.caixa {
+    position: relative;
+    width: min(100%, 360px);
+    padding: 26px 22px 18px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: var(--brilho), 0 24px 60px rgba(0, 0, 0, 0.5);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    text-align: center;
+    animation: caixa-entra 0.35s var(--mola);
+}
+
+/* Reflexo de luz na borda, igual ao da barra do topo */
+.caixa::after {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    background: radial-gradient(55% 95% at 90% 0%, rgba(255, 255, 255, 0.2), transparent 70%);
+    pointer-events: none;
+}
+
+.caixa p {
+    position: relative;
+    z-index: 1;
+    margin: 0 0 20px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.4;
+    text-wrap: balance;
+}
+
+.caixa-botoes {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    gap: 10px;
+}
+
+.caixa-botoes button {
+    flex: 1;
+    min-height: 46px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    transition: transform 0.2s var(--mola), filter 0.2s, background-color 0.2s;
+}
+
+.caixa-botoes .caixa-ok {
+    background: linear-gradient(180deg, rgba(var(--roxo), 0.95), rgba(var(--roxo-escuro), 0.95));
+}
+
+.caixa-botoes .caixa-perigo {
+    background: rgba(var(--vermelho), 0.3);
+    border-color: rgba(var(--vermelho), 0.75);
+    color: #ffe0e0;
+}
+
+.caixa-botoes button:hover {
+    filter: brightness(1.12);
+}
+
+.caixa-botoes button:active {
+    transform: scale(0.96);
+}
+
+@keyframes caixa-fade {
+    from { opacity: 0; }
+}
+
+@keyframes caixa-entra {
+    from { opacity: 0; transform: scale(0.9); }
+}
+
 /* ---------- Celular ---------- */
 @media (max-width: 480px) {
     .marca {
@@ -759,7 +857,8 @@ main {
    Safari e Firefox não distorcem o fundo do vidro: lá fica o vidro fosco normal. */
 @supports (not (font: -apple-system-body)) and (not (-moz-appearance: none)) {
     .barra,
-    .musica {
+    .musica,
+    .caixa {
         backdrop-filter: url(#agua) blur(2px) saturate(180%);
     }
 }

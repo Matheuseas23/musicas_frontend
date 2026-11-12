@@ -34,7 +34,7 @@ buscarMusicas()
 // ===== Etapa 8: apagar uma música =====
 
 async function apagarMusica(id) {
-    const confirmou = confirm("Tem certeza que quer apagar essa música?")
+    const confirmou = await confirmar("Tem certeza que quer apagar essa música?")   // confirm em Liquid Glass (abaixo)
 
     if (!confirmou) {
         return
@@ -42,9 +42,61 @@ async function apagarMusica(id) {
 
     const resposta = await fetch(`${urlBackend}/apagar/${id}`, { method: "DELETE" })
     const dados = await resposta.json()
-    alert(dados.mensagem)
+    await avisar(dados.mensagem)   // alert em Liquid Glass (abaixo)
 
     window.location.reload()
+}
+
+
+// ===== Extra do Matheus: caixas de aviso em Liquid Glass (no lugar do alert e do confirm do navegador) =====
+// avisar(mensagem): botão OK · confirmar(mensagem): Cancelar e Apagar, devolve true ou false
+
+function caixaDeAviso(mensagem, botoes) {
+    return new Promise((resolver) => {
+        const fundo = document.createElement("div")
+        fundo.className = "caixa-fundo"
+        fundo.innerHTML = `
+            <div class="caixa" role="alertdialog" aria-modal="true" aria-labelledby="caixaTexto">
+                <p id="caixaTexto">${mensagem}</p>
+                <div class="caixa-botoes"></div>
+            </div>`
+
+        const lugar = fundo.querySelector(".caixa-botoes")
+        botoes.forEach((b) => {
+            const botao = document.createElement("button")
+            botao.type = "button"
+            botao.className = b.classe
+            botao.textContent = b.texto
+            botao.addEventListener("click", () => fechar(b.valor))
+            lugar.append(botao)
+        })
+
+        function teclado(evento) {
+            if (evento.key === "Escape") fechar(botoes[0].valor)
+        }
+
+        function fechar(valor) {
+            document.removeEventListener("keydown", teclado)
+            fundo.classList.add("saindo")
+            setTimeout(() => fundo.remove(), 200)
+            resolver(valor)
+        }
+
+        document.addEventListener("keydown", teclado)
+        document.body.append(fundo)
+        lugar.firstElementChild.focus()
+    })
+}
+
+function avisar(mensagem) {
+    return caixaDeAviso(mensagem, [{ texto: "OK", classe: "caixa-ok", valor: true }])
+}
+
+function confirmar(mensagem) {
+    return caixaDeAviso(mensagem, [
+        { texto: "Cancelar", classe: "caixa-cancelar", valor: false },
+        { texto: "Apagar", classe: "caixa-perigo", valor: true }
+    ])
 }
 
 

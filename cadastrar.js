@@ -15,7 +15,7 @@ botaoCadastrar.addEventListener("click", cadastrarMusica)
 async function cadastrarMusica() {
     if (inputTitulo.value === "" || inputArtista.value === "" || inputGenero.value === "" ||
         inputAno.value === "" || inputDuracao.value === "") {
-        alert("Preencha todos os campos!")
+        await avisar("Preencha todos os campos!")   // alert em Liquid Glass (no fim do arquivo)
         return
     }
 
@@ -34,7 +34,7 @@ async function cadastrarMusica() {
     })
 
     const dados = await resposta.json()
-    alert(dados.mensagem)
+    await avisar(dados.mensagem)   // alert em Liquid Glass (no fim do arquivo)
 
     window.location.href = "index.html"
 }
@@ -139,3 +139,36 @@ avisoItunes.addEventListener("click", (evento) => {
         preencherComItunes()
     }
 })
+
+
+// ===== Extra do Matheus: caixa de aviso em Liquid Glass (no lugar do alert do navegador) =====
+
+function avisar(mensagem) {
+    return new Promise((resolver) => {
+        const fundo = document.createElement("div")
+        fundo.className = "caixa-fundo"
+        fundo.innerHTML = `
+            <div class="caixa" role="alertdialog" aria-modal="true" aria-labelledby="caixaTexto">
+                <p id="caixaTexto">${mensagem}</p>
+                <div class="caixa-botoes"><button type="button" class="caixa-ok">OK</button></div>
+            </div>`
+
+        const botao = fundo.querySelector(".caixa-ok")
+
+        function teclado(evento) {
+            if (evento.key === "Escape") fechar()
+        }
+
+        function fechar() {
+            document.removeEventListener("keydown", teclado)
+            fundo.classList.add("saindo")
+            setTimeout(() => fundo.remove(), 200)
+            resolver(true)
+        }
+
+        botao.addEventListener("click", fechar)
+        document.addEventListener("keydown", teclado)
+        document.body.append(fundo)
+        botao.focus()
+    })
+}
