@@ -7,7 +7,12 @@
     <title>Minhas Músicas</title>
     <meta name="description" content="Minhas Músicas: lista de músicas com capa e trecho de 30 segundos, no visual Liquid Glass do iPhone.">
     <link rel="icon" href="itunes.jpeg" type="image/jpeg">
-    <link rel="apple-touch-icon" href="itunes.jpeg">
+    <link rel="apple-touch-icon" href="icone-192.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Minhas Músicas">
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
@@ -24,6 +29,8 @@
     <div class="fundo" aria-hidden="true"></div>
 
     <header>
+        <a class="logo" href="index.html" aria-label="Minhas Músicas: início"><img src="itunes.jpeg" alt="" width="56" height="56"></a>
+
         <nav class="barra" aria-label="Navegação">
             <a class="ativo" href="index.html" aria-current="page">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.2 12 4l8 6.2V19a1.5 1.5 0 0 1-1.5 1.5H15v-5.5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5.5H5.5A1.5 1.5 0 0 1 4 19z" /></svg>
@@ -36,7 +43,6 @@
         </nav>
 
         <div class="marca">
-            <img src="itunes.jpeg" alt="" width="88" height="88">
             <div class="marca-texto">
                 <p>Projeto</p>
                 <h1>Minhas Músicas</h1>

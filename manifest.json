@@ -1,0 +1,14 @@
+{
+  "name": "Minhas Músicas",
+  "short_name": "Minhas Músicas",
+  "description": "Lista de músicas com capa e trecho de 30 segundos, no visual Liquid Glass do iPhone.",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#09060f",
+  "theme_color": "#09060f",
+  "icons": [
+    { "src": "icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

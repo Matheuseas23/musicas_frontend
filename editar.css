@@ -131,7 +131,7 @@ button:focus-visible {
     box-shadow: var(--brilho), 0 14px 36px rgba(0, 0, 0, 0.4);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     backdrop-filter: blur(16px) saturate(180%);
-    animation: descer 0.8s var(--mola) backwards;
+    view-transition-name: barra;   /* fica parada ao trocar de página */
 }
 
 /* Reflexo de luz na borda da barra, vindo do canto de cima, como na referência do iOS */
@@ -182,6 +182,43 @@ button:focus-visible {
 
 .barra a.ativo svg {
     stroke: var(--lilas);
+}
+
+/* ---------- Logo fixa no canto superior esquerdo (em todas as páginas) ---------- */
+.logo {
+    position: fixed;
+    z-index: 11;
+    top: calc(var(--topo) + 7px);
+    left: max(16px, env(safe-area-inset-left, 0px));
+    width: 56px;
+    height: 56px;
+    border-radius: 22%;   /* recorta os cantos pretos da logo */
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 10px 30px rgba(var(--roxo), 0.4);
+    transition: transform 0.25s var(--mola), box-shadow 0.25s;
+    view-transition-name: logo;   /* fica parada ao trocar de página */
+}
+
+.logo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+}
+
+@media (hover: hover) {
+    .logo:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22), 0 12px 36px rgba(var(--roxo), 0.6);
+    }
+}
+
+.logo:active {
+    transform: scale(0.94);
+}
+
+/* Troca de página suave: só o conteúdo muda; a logo e a barra continuam no lugar */
+@view-transition {
+    navigation: auto;
 }
 
 /* ---------- Página do formulário ---------- */
@@ -355,14 +392,16 @@ input:focus {
     from { opacity: 0; transform: translateY(20px) scale(0.98); }
 }
 
-@keyframes descer {
-    from { opacity: 0; transform: translateY(-16px) scale(0.96); }
-}
-
 /* ---------- Celular ---------- */
 @media (max-width: 480px) {
     main {
         padding-top: calc(var(--topo) + var(--altura-barra) + 24px);
+    }
+
+    .logo {
+        top: calc(var(--topo) + 11px);
+        width: 48px;
+        height: 48px;
     }
 
     .painel {
@@ -374,6 +413,21 @@ input:focus {
     .barra a {
         min-width: 76px;
         padding-inline: 12px;
+    }
+}
+
+/* Celular bem estreito (320 px): a barra vai para a direita, para não ficar em cima da logo */
+@media (max-width: 380px) {
+    .barra {
+        left: auto;
+        right: max(16px, env(safe-area-inset-right, 0px));
+        max-width: calc(100% - 96px);
+        margin-inline: 0;
+    }
+
+    .barra a {
+        min-width: 0;
+        padding-inline: 10px;
     }
 }
 
@@ -410,5 +464,9 @@ input:focus {
     *::after {
         animation: none !important;
         transition: none !important;
+    }
+
+    @view-transition {
+        navigation: none;
     }
 }
