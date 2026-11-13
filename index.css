@@ -329,13 +329,12 @@ button:focus-visible {
 .logo {
     position: fixed;
     z-index: 11;
-    top: calc(var(--topo) + 7px);
-    left: max(16px, env(safe-area-inset-left, 0px));
-    width: 56px;
-    height: 56px;
-    border-radius: 22%;   /* recorta os cantos pretos da logo */
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 10px 30px rgba(var(--roxo), 0.4);
-    transition: transform 0.25s var(--mola), box-shadow 0.25s;
+    top: calc(var(--topo) + 3px);
+    left: max(12px, env(safe-area-inset-left, 0px));
+    width: 64px;
+    height: 64px;
+    filter: drop-shadow(0 8px 18px rgba(var(--roxo), 0.5));   /* brilho no formato da logo (o PNG não tem fundo) */
+    transition: transform 0.25s var(--mola), filter 0.25s;
     view-transition-name: logo;   /* fica parada ao trocar de página */
 }
 
@@ -349,7 +348,7 @@ button:focus-visible {
 @media (hover: hover) {
     .logo:hover {
         transform: scale(1.05);
-        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22), 0 12px 36px rgba(var(--roxo), 0.6);
+        filter: drop-shadow(0 10px 24px rgba(var(--roxo), 0.75));
     }
 }
 
@@ -1208,9 +1207,9 @@ body.com-mini {
     }
 
     .logo {
-        top: calc(var(--topo) + 11px);
-        width: 48px;
-        height: 48px;
+        top: calc(var(--topo) + 7px);
+        width: 56px;
+        height: 56px;
     }
     main {
         margin-top: 36px;
