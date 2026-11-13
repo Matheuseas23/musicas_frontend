@@ -952,12 +952,24 @@ main {
     gap: 4px;
     padding: 8px 10px 12px 8px;
     border-radius: 26px;
-    background: rgba(24, 14, 40, 0.62);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    box-shadow: var(--brilho), 0 18px 44px rgba(0, 0, 0, 0.5);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    backdrop-filter: blur(24px) saturate(180%);
+    /* mesmo vidro da barra do topo */
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: var(--brilho), 0 14px 36px rgba(0, 0, 0, 0.4);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    backdrop-filter: blur(16px) saturate(180%);
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);   /* ajuda a ler sobre o vidro claro */
     animation: mini-sobe 0.4s var(--mola);
+}
+
+/* Reflexo de luz na borda, igual ao da barra do topo */
+.mini::after {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    background: radial-gradient(55% 95% at 90% 0%, rgba(255, 255, 255, 0.24), transparent 70%);
+    pointer-events: none;
 }
 
 .mini[hidden] {
@@ -1270,9 +1282,8 @@ body.com-mini {
         backdrop-filter: url(#agua) blur(2px) saturate(180%);
     }
 
-    /* O tocador e o mini ficam por cima da lista: mais desfoque para o texto não brigar com o fundo */
-    .tocador-card,
-    .mini {
+    /* O tocador fica por cima da lista: mais desfoque para o texto não brigar com o fundo */
+    .tocador-card {
         backdrop-filter: url(#agua) blur(16px) saturate(180%);
     }
 }
