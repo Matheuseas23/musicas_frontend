@@ -114,7 +114,8 @@ const capasProprias = {
 }
 
 const audio = new Audio()
-let botaoTocando = null
+const faixas = []   // uma por card: música, capa, trecho, botão e card
+let atual = -1      // qual faixa está no tocador (-1 = nenhuma)
 
 // Tira acentos, apóstrofos, maiúsculas e o que está entre parênteses:
 // "Feel So Close (Radio Edit)" vira "feel so close" e "BK'" vira "bk" (no iTunes é "BK")
@@ -167,8 +168,9 @@ function colocarCapasETrechos(musicas) {
         }
 
         // Trecho de 30 segundos
+        faixas[i] = { musica, foto, trecho: achada && achada.previewUrl, botao, card: cards[i] }
         if (achada && achada.previewUrl) {
-            botao.addEventListener("click", () => tocarTrecho(botao, achada.previewUrl))
+            botao.addEventListener("click", () => tocarFaixa(i))
         } else {
             botao.disabled = true
             botao.title = "Trecho não encontrado"
@@ -176,36 +178,205 @@ function colocarCapasETrechos(musicas) {
     })
 }
 
-function tocarTrecho(botao, endereco) {
-    // Clicou de novo na música que está tocando: para
-    if (botaoTocando === botao) {
-        pararTrecho()
+// ===== Extra do Matheus: tocador "Tocando agora" (referência 2) e mini tocador no rodapé (referência 1) =====
+// Apertar ▶ abre o card grande; a setinha ⌄ minimiza para o mini tocador; tocar no mini abre de novo.
+
+const iconeAnterior = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 5H8v14H5.5zM19 5.9v12.2a1 1 0 0 1-1.55.83L9.3 13.83a1 1 0 0 1 0-1.66l8.15-5.1A1 1 0 0 1 19 5.9z" /></svg>`
+const iconeProxima = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 5h2.5v14H16zM5 5.9v12.2a1 1 0 0 0 1.55.83l8.15-5.1a1 1 0 0 0 0-1.66L6.55 5.07A1 1 0 0 0 5 5.9z" /></svg>`
+const iconeMinimizar = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" /></svg>`
+const iconeFechar = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" /></svg>`
+
+const tocador = document.createElement("div")
+tocador.className = "tocador"
+tocador.hidden = true
+tocador.innerHTML = `
+    <div class="tocador-card" role="dialog" aria-modal="true" aria-label="Tocando agora">
+        <div class="tocador-topo">
+            <button type="button" class="tocador-minimizar" aria-label="Minimizar o tocador">${iconeMinimizar}</button>
+            <span>Tocando agora</span>
+            <span></span>
+        </div>
+        <div class="tocador-capa"></div>
+        <div class="tocador-texto">
+            <h2 class="tocador-titulo"></h2>
+            <p class="tocador-artista"></p>
+        </div>
+        <input type="range" class="tocador-barra" min="0" max="30" step="0.1" value="0" aria-label="Posição do trecho">
+        <div class="tocador-tempos"><span class="tempo-atual">0:00</span><span class="tempo-total">0:30</span></div>
+        <div class="tocador-controles">
+            <button type="button" class="tocador-anterior" aria-label="Música anterior">${iconeAnterior}</button>
+            <button type="button" class="tocador-play" aria-label="Pausar">${iconePausar}</button>
+            <button type="button" class="tocador-proxima" aria-label="Próxima música">${iconeProxima}</button>
+        </div>
+    </div>`
+
+const mini = document.createElement("div")
+mini.className = "mini"
+mini.hidden = true
+mini.innerHTML = `
+    <button type="button" class="mini-abrir" aria-label="Abrir o tocador">
+        <span class="mini-capa"></span>
+        <span class="mini-texto"><b class="mini-titulo"></b><span class="mini-artista"></span></span>
+    </button>
+    <button type="button" class="mini-play" aria-label="Pausar">${iconePausar}</button>
+    <button type="button" class="mini-proxima" aria-label="Próxima música">${iconeProxima}</button>
+    <button type="button" class="mini-fechar" aria-label="Parar e fechar">${iconeFechar}</button>
+    <span class="mini-barra"><i></i></span>`
+
+document.body.append(tocador, mini)
+
+const barra = tocador.querySelector(".tocador-barra")
+
+// 75 segundos vira "1:15"
+function tempo(segundos) {
+    const s = Math.max(0, Math.floor(segundos || 0))
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`
+}
+
+function tocarFaixa(i, abrir = true) {
+    // A música que já está no tocador: pausa ou continua
+    if (i === atual) {
+        if (audio.paused) {
+            audio.play()
+            if (abrir) abrirTocador()
+        } else {
+            audio.pause()
+        }
         return
     }
 
-    pararTrecho()
-    audio.src = endereco
+    const faixa = faixas[i]
+    atual = i
+    audio.src = faixa.trecho
     audio.play()
-    botaoTocando = botao
-    botao.classList.add("tocando")
-    botao.closest(".musica").classList.add("tocando")   // a linha do card vira ondas sonoras
-    botao.setAttribute("aria-pressed", "true")
-    botao.innerHTML = iconePausar
+
+    const capa = faixa.foto ? `<img src="${faixa.foto}" alt="">` : ""
+    tocador.querySelector(".tocador-capa").innerHTML = capa
+    tocador.querySelector(".tocador-titulo").textContent = faixa.musica.titulo
+    tocador.querySelector(".tocador-artista").textContent = faixa.musica.artista
+    mini.querySelector(".mini-capa").innerHTML = capa
+    mini.querySelector(".mini-titulo").textContent = faixa.musica.titulo
+    mini.querySelector(".mini-artista").textContent = faixa.musica.artista
+
+    if (abrir) abrirTocador()
 }
 
-function pararTrecho() {
-    audio.pause()
-    if (botaoTocando) {
-        botaoTocando.classList.remove("tocando")
-        botaoTocando.closest(".musica").classList.remove("tocando")
-        botaoTocando.setAttribute("aria-pressed", "false")
-        botaoTocando.innerHTML = iconeTocar
+function alternarTocar() {
+    if (atual < 0) return
+    if (audio.paused) {
+        audio.play()
+    } else {
+        audio.pause()
     }
-    botaoTocando = null
 }
 
-// O trecho acaba sozinho nos 30 segundos
-audio.addEventListener("ended", pararTrecho)
+// Pula para a próxima (1) ou anterior (-1) música que tem trecho; volta ao começo da lista no fim
+function pular(direcao, abrir) {
+    for (let passo = 1; passo < faixas.length; passo++) {
+        const i = (atual + direcao * passo + faixas.length) % faixas.length
+        if (faixas[i] && faixas[i].trecho) {
+            tocarFaixa(i, abrir)
+            return
+        }
+    }
+}
+
+function abrirTocador() {
+    tocador.classList.remove("saindo")
+    tocador.hidden = false
+    mini.hidden = true
+    document.body.classList.remove("com-mini")
+    tocador.querySelector(".tocador-play").focus({ preventScroll: true })
+}
+
+function minimizarTocador() {
+    if (tocador.hidden) return
+    tocador.classList.add("saindo")
+    setTimeout(() => {
+        tocador.hidden = true
+        tocador.classList.remove("saindo")
+    }, 250)
+    mini.hidden = false
+    document.body.classList.add("com-mini")
+}
+
+function fecharTudo() {
+    audio.pause()
+    atual = -1
+    tocador.hidden = true
+    mini.hidden = true
+    document.body.classList.remove("com-mini")
+    atualizarEstado()
+}
+
+// Ícones de tocar/pausar e ondas sonoras no card da lista, no tocador e no mini
+function atualizarEstado() {
+    const tocando = atual >= 0 && !audio.paused
+
+    faixas.forEach((faixa, i) => {
+        if (!faixa) return
+        const esta = i === atual && tocando
+        faixa.botao.classList.toggle("tocando", esta)
+        faixa.card.classList.toggle("tocando", esta)   // a linha do card vira ondas sonoras
+        faixa.botao.setAttribute("aria-pressed", esta ? "true" : "false")
+        faixa.botao.innerHTML = esta ? iconePausar : iconeTocar
+    })
+
+    for (const botao of [tocador.querySelector(".tocador-play"), mini.querySelector(".mini-play")]) {
+        botao.innerHTML = tocando ? iconePausar : iconeTocar
+        botao.setAttribute("aria-label", tocando ? "Pausar" : "Tocar")
+    }
+    tocador.classList.toggle("pausado", !tocando)
+}
+
+function atualizarProgresso() {
+    const total = audio.duration || 30
+    const porcento = Math.min(100, (audio.currentTime / total) * 100)
+    barra.max = total
+    barra.value = audio.currentTime
+    barra.style.setProperty("--progresso", `${porcento}%`)
+    tocador.querySelector(".tempo-atual").textContent = tempo(audio.currentTime)
+    tocador.querySelector(".tempo-total").textContent = tempo(total)
+    mini.querySelector(".mini-barra i").style.width = `${porcento}%`
+}
+
+audio.addEventListener("play", atualizarEstado)
+audio.addEventListener("pause", atualizarEstado)
+audio.addEventListener("timeupdate", atualizarProgresso)
+audio.addEventListener("loadedmetadata", atualizarProgresso)
+
+// O trecho acabou: vai para a próxima música da lista (para no fim)
+audio.addEventListener("ended", () => {
+    const proxima = faixas.findIndex((faixa, i) => i > atual && faixa && faixa.trecho)
+    if (proxima >= 0) {
+        tocarFaixa(proxima, false)
+    } else {
+        atualizarEstado()
+    }
+})
+
+// Arrastar a barra muda a posição do trecho
+barra.addEventListener("input", () => {
+    audio.currentTime = Number(barra.value)
+    atualizarProgresso()
+})
+
+tocador.querySelector(".tocador-minimizar").addEventListener("click", minimizarTocador)
+tocador.querySelector(".tocador-play").addEventListener("click", alternarTocar)
+tocador.querySelector(".tocador-anterior").addEventListener("click", () => pular(-1, true))
+tocador.querySelector(".tocador-proxima").addEventListener("click", () => pular(1, true))
+tocador.addEventListener("click", (evento) => {
+    if (evento.target === tocador) minimizarTocador()   // tocou fora do card
+})
+
+mini.querySelector(".mini-abrir").addEventListener("click", abrirTocador)
+mini.querySelector(".mini-play").addEventListener("click", alternarTocar)
+mini.querySelector(".mini-proxima").addEventListener("click", () => pular(1, false))
+mini.querySelector(".mini-fechar").addEventListener("click", fecharTudo)
+
+document.addEventListener("keydown", (evento) => {
+    if (evento.key === "Escape" && !tocador.hidden) minimizarTocador()
+})
 
 
 // ===== Extra do Matheus: a abertura só aparece quando o site é aberto =====
