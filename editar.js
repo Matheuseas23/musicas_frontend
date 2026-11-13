@@ -70,23 +70,93 @@ inputTitulo.parentElement.append(avisoItunes)
 let esperaBusca = null
 let numeroBusca = 0
 
-// Igual ao da lista: tira acentos, apóstrofos, maiúsculas e o que está entre parênteses
-function simplificar(texto) {
+// ===== Busca no iTunes (ampliada: acha remix, ao vivo, feat...) =====
+// Deixa só letras e números, sem acento e em minúsculas:
+// "Anunciação (Jopin Remix)" vira "anunciacao jopin remix" e "BK'" vira "bk" (no iTunes é "BK")
+function normalizar(texto) {
     return texto
         .normalize("NFD")
         .replace(/[̀-ͯ]/g, "")
         .replace(/['’`´]/g, "")
-        .replace(/\(.*?\)/g, "")
         .toLowerCase()
+        .replace(/[^a-z0-9]+/g, " ")
         .trim()
 }
 
+// Igual, mas sem o que está entre parênteses: "Feel So Close (Radio Edit)" vira "feel so close"
+function simplificar(texto) {
+    return normalizar(texto.replace(/\(.*?\)|\[.*?\]/g, " "))
+}
+
+// Separa os artistas: "BK' e Kolo (part. Evinha)" vira ["bk", "kolo", "evinha"]
+function separarArtistas(texto) {
+    return texto
+        .split(/,|&|\(|\)|\s+(?:e|x|com|feat\.?|ft\.?|part\.?)\s+/i)
+        .map((nome) => normalizar(nome).replace(/^(feat|ft|part|participacao)\s+/, ""))
+        .filter((nome) => nome !== "")
+}
+
+// Versões diferentes da de estúdio
+function eVersao(texto) {
+    return /\b(remix|live|ao vivo|acoustic|acustico|acustica|sped up|slowed|instrumental|karaoke)\b/.test(normalizar(texto))
+}
+
+async function pesquisarItunes(termo) {
+    const resposta = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(termo)}&entity=song&limit=50&country=BR`)
+    const dados = await resposta.json()
+    return dados.results
+}
+
+// Procura de 3 jeitos, do mais exato ao mais aberto, e para no primeiro que achar:
+// 1) o título inteiro (com o que está entre parênteses) + o 1º artista
+// 2) o título sem os parênteses + o 1º artista
+// 3) só o título
+// Vale a música que tem todas as palavras do título e um dos artistas digitados.
+// Entre elas: a versão certa primeiro (remix só se você escreveu remix; senão, a de estúdio),
+// depois a que tem mais palavras iguais ao que você digitou.
+async function buscarNoItunes(titulo, artista) {
+    const palavrasTitulo = simplificar(titulo).split(" ")
+    if (palavrasTitulo[0] === "") return null
+
+    const pedidas = normalizar(titulo).split(" ")
+    const artistas = separarArtistas(artista)
+    const principal = artistas[0] || ""
+    const querVersao = eVersao(titulo)
+
+    const tentativas = [
+        `${normalizar(titulo)} ${principal}`,
+        `${simplificar(titulo)} ${principal}`,
+        simplificar(titulo)
+    ].map((termo) => termo.trim())
+
+    for (const termo of new Set(tentativas)) {
+        const resultados = await pesquisarItunes(termo)
+
+        const certas = resultados.filter((r) => {
+            const nome = ` ${normalizar(r.trackName)} `
+            const deQuem = normalizar(`${r.artistName} ${r.trackName}`)
+            return palavrasTitulo.every((p) => nome.includes(` ${p} `)) &&
+                (artistas.length === 0 || artistas.some((a) => deQuem.includes(a)))
+        })
+
+        if (certas.length > 0) {
+            const nota = (r) => {
+                const nome = normalizar(r.trackName).split(" ")
+                const iguais = pedidas.filter((p) => nome.includes(p)).length
+                const versaoCerta = eVersao(`${r.trackName} ${r.collectionName}`) === querVersao ? 100 : 0
+                return versaoCerta + iguais * 2 - (nome.length - iguais)
+            }
+            certas.sort((a, b) => nota(b) - nota(a))
+            return certas[0]
+        }
+    }
+    return null
+}
+
 async function procurarNoItunes() {
-    const titulo = simplificar(inputTitulo.value)
-    const artista = simplificar(inputArtista.value).split(/ e | & |, /)[0]
     const esta = ++numeroBusca   // para ignorar respostas de buscas antigas
 
-    if (titulo === "") {
+    if (simplificar(inputTitulo.value) === "") {
         avisoItunes.className = "aviso-itunes"
         avisoItunes.innerHTML = ""
         return
@@ -96,13 +166,8 @@ async function procurarNoItunes() {
     avisoItunes.textContent = "Procurando no iTunes..."
 
     try {
-        const termo = encodeURIComponent(`${titulo} ${artista}`)
-        const resposta = await fetch(`https://itunes.apple.com/search?term=${termo}&entity=song&limit=15&country=BR`)
-        const dados = await resposta.json()
+        const achada = await buscarNoItunes(inputTitulo.value, inputArtista.value)
         if (esta !== numeroBusca) return
-
-        const achada = dados.results.find((r) =>
-            simplificar(r.trackName).startsWith(titulo) && simplificar(r.artistName).includes(artista))
 
         ultimaAchada = achada || null
 
