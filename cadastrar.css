@@ -112,6 +112,25 @@ button:focus-visible {
     to { transform: translate(-65vw, -71.5vh) scale(0.9); }
 }
 
+/* Celular em pé: as manchas seguem a largura da tela (com vmax ficavam enormes, com cara de zoom) */
+@media (max-width: 480px) and (orientation: portrait) {
+    .fundo::before,
+    .fundo::after {
+        width: 140vw;
+        height: 140vw;
+    }
+
+    .fundo::before {
+        left: calc(5% - 70vw);
+        top: calc(5% - 70vw);
+    }
+
+    .fundo::after {
+        left: calc(95% - 70vw);
+        top: calc(95% - 70vw);
+    }
+}
+
 /* ---------- Barra do topo em vidro (o "margin top" do iPhone) ---------- */
 .barra {
     position: fixed;
