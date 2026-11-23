@@ -23,33 +23,59 @@
             <feGaussianBlur in="ruido" stdDeviation="1.5" result="ondas" />
             <feDisplacementMap in="SourceGraphic" in2="ondas" scale="42" xChannelSelector="R" yChannelSelector="B" />
         </filter>
-
-        <!-- Lente da abertura: a logo começa entortada e com as cores separadas, e vai ficando nítida -->
-        <filter id="lente" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
-            <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="4" result="ruido" />
-            <feDisplacementMap in="SourceGraphic" in2="ruido" scale="0" xChannelSelector="R" yChannelSelector="G" result="torto">
-                <animate attributeName="scale" values="110;35;0" keyTimes="0;0.55;1" dur="1.2s" begin="0.6s" fill="freeze" />
-            </feDisplacementMap>
-            <feColorMatrix in="torto" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="vermelho" />
-            <feOffset in="vermelho" dx="0" result="vermelhoDesloc">
-                <animate attributeName="dx" values="-14;-5;0" keyTimes="0;0.6;1" dur="1.4s" begin="0.6s" fill="freeze" />
-            </feOffset>
-            <feColorMatrix in="torto" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="verde" />
-            <feColorMatrix in="torto" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="azul" />
-            <feOffset in="azul" dx="0" result="azulDesloc">
-                <animate attributeName="dx" values="14;5;0" keyTimes="0;0.6;1" dur="1.4s" begin="0.6s" fill="freeze" />
-            </feOffset>
-            <feBlend in="vermelhoDesloc" in2="verde" mode="screen" result="vermelhoVerde" />
-            <feBlend in="vermelhoVerde" in2="azulDesloc" mode="screen" />
-        </filter>
     </svg>
 
-    <!-- Abertura: a logo surge numa bolha de vidro e voa para o canto -->
+    <!-- Intro "evolução da TI": 6 IAs se juntam no Claude, a câmera mergulha nele e passa
+         por 4 fases, uma dentro da tela da outra; depois volta e aparece a logo do site -->
     <div class="abertura" aria-hidden="true">
-        <div class="abertura-bolha"></div>
-        <div class="abertura-logo">
-            <img src="logo.png" alt="" width="200" height="200">
+        <div class="intro-ias">
+            <span class="ia ia-chatgpt"></span>
+            <span class="ia ia-gemini"></span>
+            <span class="ia ia-copilot"></span>
+            <span class="ia ia-claude"></span>
+            <span class="ia ia-antigravity"></span>
+            <span class="ia ia-github"></span>
         </div>
+
+        <div class="intro-mergulho">
+            <div class="fase fase-1">
+                <div class="fase-zoom">
+                    <img src="intro/fase1.jpg" alt="">
+                    <p class="fase-legenda"><b>1981</b> A era do tubo</p>
+                </div>
+            </div>
+            <div class="fase fase-2">
+                <div class="fase-zoom">
+                    <img src="intro/fase2.jpg" alt="">
+                    <p class="fase-legenda"><b>2016</b> O PC moderno</p>
+                </div>
+            </div>
+            <div class="fase fase-3">
+                <div class="fase-zoom">
+                    <img src="intro/fase3.jpg" alt="">
+                    <img class="adesivo adesivo-qr" src="intro/qr.svg" alt="">
+                    <img class="adesivo adesivo-pix" src="intro/pix.svg" alt="">
+                    <p class="fase-legenda"><b>2020</b> QR Code, Pix e a primeira IA</p>
+                </div>
+            </div>
+            <div class="fase fase-4">
+                <div class="fase-zoom">
+                    <img src="intro/fase4.jpg" alt="">
+                    <div class="ias-hoje">
+                        <span class="hoje ia-chatgpt"></span>
+                        <span class="hoje ia-gemini"></span>
+                        <span class="hoje ia-copilot"></span>
+                        <span class="hoje ia-claude"></span>
+                        <span class="hoje ia-antigravity"></span>
+                        <span class="hoje ia-github"></span>
+                    </div>
+                    <p class="fase-legenda"><b>Hoje</b> As IAs e o código</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="intro-brilho"></div>
+        <div class="intro-logo"><img src="logo.png" alt="" width="160" height="160"></div>
     </div>
 
     <!-- Fundo animado: 2 manchas roxas desfocadas se mexendo -->

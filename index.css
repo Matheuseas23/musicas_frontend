@@ -26,7 +26,7 @@
              "Segoe UI Variable Display", "Segoe UI", Roboto, system-ui, sans-serif;
     --topo: calc(env(safe-area-inset-top, 0px) + 14px);   /* espaço acima da barra (notch do iPhone) */
     --altura-barra: 66px;
-    --atraso: 2.6s;   /* o título e os cards entram enquanto o site entra em foco */
+    --atraso: 12.7s;   /* o título e os cards entram quando a intro termina e o site entra em foco */
 }
 
 * {
@@ -134,120 +134,353 @@ button:focus-visible {
     }
 }
 
-/* ---------- Abertura (só na página inicial) ----------
-   Tela preta; uma bolha de vidro cresce com borda de arco-íris; a logo aparece por dentro
-   dela, entortada e com as cores separadas (filtro #lente do HTML), fica nítida e some num
-   fade out com desfoque, enquanto o site aparece saindo do desfoque para o foco. */
+/* ---------- Intro "evolução da TI" (só na página inicial) ----------
+   Ideia do Matheus, inspirada no MOVIMENTO da intro do GTA VI (só o movimento; as imagens são outras):
+   0,3 s        os ícones de 6 IAs acendem em fila (roxo → branco), como as 6 estrelas
+   1,75 s       elas se juntam no meio e fica só o Claude
+   2,4 s        a câmera mergulha no Claude: o formato dele vira uma janela que cresce
+   2,4 a 10,2 s 4 fases, cada uma nasce dentro da TELA da anterior:
+                tubo (1981) → PC de 2016 → celular com a 1ª IA, QR Code e Pix → hoje (código + IAs)
+   10,2 s       a câmera volta: a cena encolhe de novo no formato do Claude
+   11,1 s       brilho roxo e a logo do site aparece
+   12,6 s       a intro some com desfoque e o site entra em foco
+   O botão "Pular" é criado pelo index.js. Fotos e ícones em intro/ (créditos em intro/creditos.txt). */
 .abertura {
     position: fixed;
     inset: 0;
     z-index: 100;
     overflow: hidden;
-    background: #000;
+    background: #07040c;
     -webkit-backdrop-filter: blur(24px);   /* o site por trás aparece desfocado e entra em foco */
     backdrop-filter: blur(24px);
-    animation: abertura-some 0.9s ease 2.5s forwards;
+    animation: abertura-some 0.9s ease 12.6s forwards;
 }
 
-.abertura-bolha,
-.abertura-logo {
+.intro-ias,
+.intro-brilho,
+.intro-logo {
     position: absolute;
     left: 50%;
     top: 50%;
     translate: -50% -50%;
 }
 
-/* Bolha de vidro com borda de arco-íris */
-.abertura-bolha {
-    width: min(72vmin, 320px);
-    aspect-ratio: 1;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0) 58%, rgba(255, 255, 255, 0.09) 68%, rgba(255, 255, 255, 0) 71%);
-    box-shadow: inset 0 0 36px rgba(255, 255, 255, 0.16), inset 0 0 3px rgba(255, 255, 255, 0.55), 0 0 70px rgba(124, 140, 255, 0.28);
-    opacity: 0;
-    scale: 0.12;
-    animation: bolha 2s var(--mola) 0.3s forwards;
+/* Os ícones (arquivos SVG de uma cor) viram "carimbos": a cor vem do background */
+.ia-chatgpt     { --icone: url(intro/openai.svg);      --i: 0; }
+.ia-gemini      { --icone: url(intro/gemini.svg);      --i: 1; }
+.ia-copilot     { --icone: url(intro/copilot.svg);     --i: 2; }
+.ia-claude      { --icone: url(intro/claude.svg);      --i: 3; }
+.ia-antigravity { --icone: url(intro/antigravity.svg); --i: 4; }
+.ia-github      { --icone: url(intro/github.svg);      --i: 5; }
+
+.ia,
+.hoje::before {
+    -webkit-mask: var(--icone) center / contain no-repeat;
+    mask: var(--icone) center / contain no-repeat;
 }
 
-.abertura-bolha::before {
-    content: "";
+/* 1) As 6 IAs em fila, acendendo uma por uma */
+.intro-ias {
+    display: flex;
+    gap: 16px;
+    filter: drop-shadow(0 0 6px rgba(var(--roxo), 0.9)) drop-shadow(0 0 18px rgba(var(--roxo), 0.5));
+}
+
+.ia {
+    width: 30px;
+    height: 30px;
+    background: #fff;
+    opacity: 0;
+    animation:
+        ia-acende 0.7s ease calc(0.3s + var(--i) * 0.12s) forwards,
+        ia-junta 0.65s cubic-bezier(0.6, 0, 0.3, 1) 1.75s forwards;
+}
+
+/* 2) e 3) O Claude fica no meio, ganha a cor dele e a câmera mergulha nele */
+.ia.ia-claude {
+    animation:
+        ia-acende 0.7s ease calc(0.3s + var(--i) * 0.12s) forwards,
+        claude-junta 0.65s cubic-bezier(0.6, 0, 0.3, 1) 1.75s forwards,
+        claude-mergulha 0.8s cubic-bezier(0.55, 0, 0.9, 0.4) 2.4s forwards;
+}
+
+@keyframes ia-acende {
+    0%   { opacity: 0; scale: 0.5; background-color: #4c1d95; }
+    55%  { opacity: 0.85; background-color: #a78bfa; }
+    100% { opacity: 1; scale: 1; background-color: #fff; }
+}
+
+/* Cada IA anda até o meio da fila (46 px = ícone + espaço) e some */
+@keyframes ia-junta {
+    to { translate: calc((2.5 - var(--i)) * 46px) 0; scale: 0.5; opacity: 0; }
+}
+
+@keyframes claude-junta {
+    to { translate: -23px 0; scale: 1.4; opacity: 1; background-color: #d97757; }
+}
+
+@keyframes claude-mergulha {
+    from { translate: -23px 0; scale: 1.4; opacity: 1; background-color: #d97757; }
+    to   { translate: -23px 0; scale: 18; opacity: 0; background-color: #d97757; }
+}
+
+/* A janela no formato do Claude: cresce até cobrir a tela e, no fim, encolhe de volta */
+.intro-mergulho {
     position: absolute;
     inset: 0;
-    border-radius: 50%;
-    background: conic-gradient(from 0deg, #ff5f7e, #ffd166, #3ddc97, #4cc9f0, #8b5cf6, #ff5f7e);
-    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 3px));
-    mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 3px));
-    filter: blur(1.5px);
-    opacity: 0.85;
-    animation: girar 2.3s linear 0.3s;
+    opacity: 0;
+    -webkit-mask: url(intro/claude.svg) center / 42px 42px no-repeat;
+    mask: url(intro/claude.svg) center / 42px 42px no-repeat;
+    animation:
+        janela 8.7s linear 2.4s both,
+        janela-aparece 11.3s linear both;
 }
 
-/* A logo da nota musical */
-.abertura-logo {
-    width: 200px;
-    height: 200px;
-    border-radius: 22%;
+@keyframes janela {
+    0%    { -webkit-mask-size: 42px 42px; mask-size: 42px 42px; animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.5); }
+    10.3% { -webkit-mask-size: 20000px 20000px; mask-size: 20000px 20000px; }
+    89.7% { -webkit-mask-size: 20000px 20000px; mask-size: 20000px 20000px; animation-timing-function: cubic-bezier(0.1, 0.55, 0.35, 1); }
+    100%  { -webkit-mask-size: 40px 40px; mask-size: 40px 40px; }
+}
+
+@keyframes janela-aparece {
+    0%, 21.2% { opacity: 0; }
+    21.3%, 96% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* 4) As fases. .fase = entrada (cresce a partir da tela da fase anterior);
+      .fase-zoom = mergulho (cresce em direção à tela desta fase) */
+.fase,
+.fase-zoom {
+    position: absolute;
+    inset: 0;
+}
+
+.fase {
     overflow: hidden;
     opacity: 0;
-    scale: 0.6;
-    animation:
-        logo-surge 1.2s var(--mola) 0.6s forwards,
-        logo-sai 0.7s ease-in 2.4s forwards;
+    transform-origin: var(--origem, 50% 50%);
 }
 
-.abertura-logo img {
+.fase-zoom {
+    transform-origin: var(--alvo);
+}
+
+/* A tela de cada aparelho fica no mesmo ponto da foto e da tela do site (object-position = alvo) */
+.fase-zoom > img:first-child {
     display: block;
     width: 100%;
     height: 100%;
-    filter: url(#lente);
+    object-fit: cover;
+    object-position: var(--alvo);
 }
 
-/* Reflexo de luz passando pela logo */
-.abertura-logo::after {
+.fase-1 { --alvo: 48% 44%; animation: fase-primeira 1s ease-out 2.4s both; }
+.fase-2 { --alvo: 40% 38%; --origem: 48% 44%; animation: fase-entra 0.9s cubic-bezier(0.2, 0.7, 0.3, 1) 3.65s both; }
+.fase-3 { --alvo: 68% 63%; --origem: 40% 38%; animation: fase-entra 0.9s cubic-bezier(0.2, 0.7, 0.3, 1) 5.6s both; }
+.fase-4 { --alvo: 50% 50%; --origem: 68% 63%; animation: fase-entra 0.9s cubic-bezier(0.2, 0.7, 0.3, 1) 7.55s both; }
+
+.fase-1 .fase-zoom { animation: fase-mergulha 2s linear 2.6s both; }
+.fase-2 .fase-zoom { animation: fase-mergulha 2s linear 4.55s both; }
+.fase-3 .fase-zoom { animation: fase-mergulha 2s linear 6.5s both; }
+.fase-4 .fase-zoom { animation: fase-final 1.75s linear 8.45s both; }
+
+/* Celular em pé: a foto inteira no meio (senão só aparecia a tela do aparelho) e a mesma foto
+   desfocada atrás, preenchendo a tela. O ponto do mergulho muda junto: o "y" vira
+   50% + (y da foto - 50%) × (altura da foto ÷ altura da tela), calculado para ~390 × 844. */
+@media (max-aspect-ratio: 3/4) {
+    .fase-1 { --foto: url(intro/fase1.jpg); --alvo: 48% 48.4%; }
+    .fase-2 { --foto: url(intro/fase2.jpg); --alvo: 40% 46.3%; --origem: 48% 48.4%; }
+    .fase-3 { --foto: url(intro/fase3.jpg); --alvo: 68% 54%;   --origem: 40% 46.3%; }
+    .fase-4 { --foto: url(intro/fase4.jpg); --alvo: 50% 50%;   --origem: 68% 54%; }
+
+    .fase-zoom::before {
+        content: "";
+        position: absolute;
+        inset: -40px;
+        background: var(--foto) center / cover;
+        filter: blur(22px) brightness(0.5) saturate(1.3);
+    }
+
+    .fase-zoom > img:first-child {
+        position: relative;
+        object-fit: contain;
+        object-position: 50% 50%;
+    }
+}
+
+@keyframes fase-primeira {
+    from { opacity: 1; scale: 1.6; }
+    to   { opacity: 1; scale: 1; }
+}
+
+@keyframes fase-entra {
+    0%   { opacity: 0; scale: 0.14; border-radius: 14vmin; }
+    30%  { opacity: 1; }
+    100% { opacity: 1; scale: 1; border-radius: 0; }
+}
+
+/* Empurra devagar e depois acelera para dentro da tela do aparelho */
+@keyframes fase-mergulha {
+    0%   { scale: 1; opacity: 1; }
+    45%  { scale: 1.15; opacity: 1; animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.6); }
+    100% { scale: 7; opacity: 0; }
+}
+
+@keyframes fase-final {
+    from { scale: 1; }
+    to   { scale: 1.12; }
+}
+
+/* Ano + nome da fase, no canto de baixo */
+.fase-legenda {
+    position: absolute;
+    left: max(20px, 5vw);
+    bottom: max(30px, 8vh);
+    margin: 0;
+    color: #fff;
+    font-size: clamp(15px, 2.2vw, 22px);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.85), 0 0 2px rgba(0, 0, 0, 0.6);
+}
+
+.fase-legenda b {
+    display: block;
+    font-size: clamp(38px, 7vw, 76px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+
+/* Fase 3: QR Code e Pix colados como adesivos (colagem) */
+.adesivo {
+    position: absolute;
+    border-radius: 10px;
+    box-shadow: 0 0 0 5px #fff, 0 12px 30px rgba(0, 0, 0, 0.55);
+    animation: adesivo-cola 0.5s var(--mola) both;
+}
+
+.adesivo-qr {
+    left: 8%;
+    top: 15%;
+    width: min(22vmin, 160px);
+    rotate: -9deg;
+    animation-delay: 6.25s;
+}
+
+.adesivo-pix {
+    right: 7%;
+    top: 17%;
+    width: min(28vmin, 200px);
+    rotate: 8deg;
+    animation-delay: 6.45s;
+}
+
+@keyframes adesivo-cola {
+    from { opacity: 0; scale: 1.7; }
+}
+
+/* Fase 4: as IAs de hoje em volta do código, em bolhas de vidro (o código fica mais escuro para elas aparecerem) */
+.fase-4 .fase-zoom > img:first-child {
+    filter: brightness(0.55) saturate(1.1);
+}
+
+.ias-hoje {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+}
+
+.hoje {
+    --tam: clamp(58px, 12vmin, 100px);
+    position: absolute;
+    width: var(--tam);
+    height: var(--tam);
+    margin: calc(var(--tam) / -2);
+    border-radius: 50%;
+    background: rgba(28, 14, 50, 0.78);
+    border: 1.5px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 0 6px rgba(var(--roxo), 0.18), 0 0 34px rgba(var(--roxo), 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    transform: rotate(calc(var(--i) * 60deg - 90deg)) translate(min(34vmin, 250px)) rotate(calc(90deg - var(--i) * 60deg));
+    opacity: 0;
+    animation: hoje-surge 0.6s var(--mola) calc(8.1s + var(--i) * 0.1s) both;
+}
+
+.hoje::before {
     content: "";
     position: absolute;
-    inset: 0;
-    background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.32) 50%, transparent 65%);
-    translate: -110% 0;
-    animation: reflexo 0.8s ease-in-out 1.75s forwards;
+    inset: 24%;
+    background: #fff;
+}
+
+@keyframes hoje-surge {
+    from { opacity: 0; scale: 0.3; }
+    to   { opacity: 1; scale: 1; }
+}
+
+/* 5) A volta: brilho roxo em cruz (como uma estrela) e a logo do site */
+.intro-brilho {
+    width: 70vmin;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(221, 214, 254, 0.95) 0, rgba(var(--roxo), 0.55) 16%, rgba(var(--roxo-escuro), 0.22) 38%, transparent 66%);
+    opacity: 0;
+    animation: brilho 1.2s ease-out 10.85s forwards;
+}
+
+.intro-brilho::before,
+.intro-brilho::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 2px;
+    margin-top: -1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+}
+
+.intro-brilho::after {
+    rotate: 90deg;
+}
+
+@keyframes brilho {
+    0%   { opacity: 0; scale: 0.1; }
+    35%  { opacity: 1; scale: 0.6; }
+    100% { opacity: 0; scale: 1.3; }
+}
+
+.intro-logo {
+    width: 160px;
+    height: 160px;
+    opacity: 0;
+    filter: drop-shadow(0 0 18px rgba(var(--roxo), 0.9)) drop-shadow(0 0 44px rgba(var(--roxo-escuro), 0.8));
+    animation: logo-chega 0.9s var(--mola) 11.15s forwards;
+}
+
+.intro-logo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    animation: foco 0.8s ease 11.15s backwards;
+}
+
+@keyframes logo-chega {
+    0%   { opacity: 0; scale: 0.35; }
+    60%  { opacity: 1; scale: 1.06; }
+    100% { opacity: 1; scale: 1; }
 }
 
 /* A logo fixa do canto entra em foco junto com o site */
 .logo {
-    animation: foco 0.7s ease 2.7s backwards;
-}
-
-@keyframes bolha {
-    0%   { opacity: 0; scale: 0.12; }
-    20%  { opacity: 1; }
-    55%  { opacity: 1; scale: 1; }
-    100% { opacity: 0; scale: 1.45; }
-}
-
-@keyframes girar {
-    to { rotate: 360deg; }
-}
-
-@keyframes logo-surge {
-    0%   { opacity: 0; scale: 0.6; }
-    35%  { opacity: 1; }
-    70%  { scale: 1.06; }
-    100% { opacity: 1; scale: 1; }
-}
-
-/* Fade out com desfoque */
-@keyframes logo-sai {
-    from { opacity: 1; scale: 1; filter: blur(0); }
-    to   { opacity: 0; scale: 1.18; filter: blur(16px); }
+    animation: foco 0.7s ease 12.8s backwards;
 }
 
 /* Do desfoque para o foco */
 @keyframes foco {
     from { opacity: 0; filter: blur(12px); }
-}
-
-@keyframes reflexo {
-    to { translate: 110% 0; }
 }
 
 @keyframes abertura-some {
@@ -257,6 +490,61 @@ button:focus-visible {
         backdrop-filter: blur(0);
         visibility: hidden;
     }
+}
+
+/* Igual, para o botão "Pular" (outro nome para começar na hora) */
+@keyframes abertura-pula {
+    to {
+        opacity: 0;
+        -webkit-backdrop-filter: blur(0);
+        backdrop-filter: blur(0);
+        visibility: hidden;
+    }
+}
+
+/* Botão "Pular" (criado pelo index.js), em vidro no canto de baixo */
+.intro-pular {
+    position: fixed;
+    z-index: 101;
+    right: max(16px, env(safe-area-inset-right, 0px));
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
+    padding: 10px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font: 600 15px var(--fonte);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    backdrop-filter: blur(14px) saturate(160%);
+    box-shadow: var(--brilho);
+    cursor: pointer;
+    opacity: 0;
+    animation: pular-entra 0.5s ease 1s forwards, pular-some 0.4s ease 12.4s forwards;
+}
+
+.intro-pular:active {
+    scale: 0.95;
+}
+
+@keyframes pular-entra {
+    to { opacity: 1; }
+}
+
+@keyframes pular-some {
+    to { opacity: 0; visibility: hidden; }
+}
+
+/* Clicou em "Pular": a intro some na hora e o site entra sem esperar */
+.intro-pulou {
+    --atraso: 0s;
+}
+
+.intro-pulou .abertura {
+    animation: abertura-pula 0.45s ease forwards;
+}
+
+.intro-pulou .logo {
+    animation: none;
 }
 
 /* Já abriu o site nesta visita (o index.js põe a classe "ja-abriu"): sem abertura e sem espera */
@@ -1337,7 +1625,8 @@ body.com-mini {
     }
 
     /* Sem animações, não há abertura: o site aparece direto */
-    .abertura {
+    .abertura,
+    .intro-pular {
         display: none !important;
     }
 }

@@ -1,0 +1,9 @@
+Créditos da intro (fotos do Wikimedia Commons, com efeito de pintura aplicado)
+
+fase1.jpg  "IBM 5154 - PC DOS Prompt.jpg", phreakindee, CC0
+fase2.jpg  "Gaming PC-Setup - Astaroth- The Completed System.jpg", Brian Wong, CC BY-SA 2.0
+fase3.jpg  "Smartphone with ChatGPT on keyboard (52917311050).jpg", Jernej Furman, CC BY 2.0
+fase4.jpg  "RustCodeOnScreen.jpg", Slashme, CC0
+
+Ícones das IAs (openai, gemini, copilot, claude, antigravity, github): LobeHub Icons (@lobehub/icons-static-svg 1.106.0), licença MIT.
+As marcas pertencem às suas empresas; usadas aqui só para ilustrar, num trabalho escolar.
