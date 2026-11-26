@@ -446,20 +446,3 @@ try {
 } catch (error) {
     console.log(error)
 }
-
-
-// ===== Extra do Matheus: botão "Pular" da intro "evolução da TI" =====
-// Só aparece quando a intro vai passar (1ª vez na aba e sem "reduzir movimento" ligado).
-if (!document.documentElement.classList.contains("ja-abriu") &&
-    !matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    const botaoPular = document.createElement("button")
-    botaoPular.type = "button"
-    botaoPular.className = "intro-pular"
-    botaoPular.textContent = "Pular"
-    botaoPular.addEventListener("click", () => {
-        document.documentElement.classList.add("intro-pulou")
-        botaoPular.remove()
-    })
-    document.body.append(botaoPular)
-    setTimeout(() => botaoPular.remove(), 13000)   // a intro acaba em ~13 s
-}
