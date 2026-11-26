@@ -672,6 +672,66 @@ main {
     border: 1px solid rgba(var(--vermelho), 0.6);
 }
 
+/* Alça de arrastar (6 pontinhos), no fim da linha do Editar/Apagar */
+.arrastar {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    margin-left: auto;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.55);
+    cursor: grab;
+    touch-action: none;          /* no celular, arrastar a alça não rola a página */
+    -webkit-user-select: none;
+    user-select: none;
+    transition: color 0.25s, background-color 0.25s, border-color 0.25s;
+}
+
+.arrastar svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+}
+
+.arrastar:focus-visible {
+    outline: 2px solid rgba(var(--roxo), 0.9);
+    outline-offset: 2px;
+    color: #fff;
+}
+
+/* Enquanto arrasta: nada de selecionar texto, e o card solto fica por cima, maior e brilhando */
+.ordenando {
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: grabbing;
+}
+
+.ordenando .arrastar {
+    cursor: grabbing;
+}
+
+.musica.arrastando {
+    z-index: 5;
+    background: rgba(38, 22, 62, 0.9);   /* vidro mais fechado: o card de baixo não aparece através dele */
+    border-color: rgba(var(--roxo), 0.6);
+    box-shadow: var(--brilho), 0 30px 70px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(var(--roxo), 0.35), 0 0 40px rgba(var(--roxo), 0.3);
+}
+
+/* Card que já mudou de lugar: a capa não refaz a animação de aparecer */
+.musica.movido .capa img {
+    animation: none;
+}
+
+.musica.arrastando .arrastar {
+    color: #fff;
+    background: rgba(var(--roxo), 0.45);
+    border-color: rgba(var(--roxo), 0.8);
+}
+
 /* ---------- Animações ao passar o mouse e ao clicar ---------- */
 @media (hover: hover) {
     .barra a:hover {
@@ -688,6 +748,17 @@ main {
         background: rgba(255, 255, 255, 0.1);
         border-color: rgba(255, 255, 255, 0.26);
         box-shadow: var(--brilho), 0 26px 56px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(var(--roxo), 0.18);
+    }
+
+    .arrastar:hover {
+        color: #fff;
+        background: rgba(var(--roxo), 0.25);
+        border-color: rgba(var(--roxo), 0.6);
+    }
+
+    /* Enquanto arrasta, os outros cards não sobem com o mouse */
+    .ordenando .musica:not(.arrastando):hover {
+        transform: none;
     }
 
     .tocar:not(:disabled):hover {

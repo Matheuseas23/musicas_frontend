@@ -11,7 +11,7 @@ async function buscarMusicas() {
 
     musicas.forEach((musica) => {
         listaMusicas.innerHTML += `
-            <article class="musica">
+            <article class="musica" data-id="${musica.id}">
                 <div class="capa" role="img" aria-label="Capa de ${musica.titulo}"></div>
                 <h2>${musica.titulo}</h2>
                 <p class="artista">${musica.artista}</p>
@@ -20,6 +20,7 @@ async function buscarMusicas() {
                 <div class="acoes">
                     <a class="editar" href="editar.html?id=${musica.id}">Editar</a>
                     <button class="apagar" onclick="apagarMusica(${musica.id})">Apagar</button>
+                    <button class="arrastar" type="button" aria-label="Mudar ${musica.titulo} de lugar: arraste ou use as setas" title="Arraste para mudar a ordem">${iconeArrastar}</button>
                 </div>
             </article>
         `
@@ -106,6 +107,8 @@ function confirmar(mensagem) {
 
 // Triângulo centralizado (só meio ponto à direita, que é o centro "visual" de um ▶)
 const iconeTocar = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5.14v13.72a1 1 0 0 0 1.52.85l10.4-6.86a1 1 0 0 0 0-1.7L7.92 4.29A1 1 0 0 0 6.4 5.14z" /></svg>`
+// 6 pontinhos: a alça para arrastar o card
+const iconeArrastar = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="6" r="1.7" /><circle cx="15" cy="6" r="1.7" /><circle cx="9" cy="12" r="1.7" /><circle cx="15" cy="12" r="1.7" /><circle cx="9" cy="18" r="1.7" /><circle cx="15" cy="18" r="1.7" /></svg>`
 const iconePausar = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" /></svg>`
 
 // Capas escolhidas pelo Matheus que o iTunes do Brasil não tem
@@ -224,9 +227,11 @@ function colocarCapasETrechos(musicas) {
         }
 
         // Trecho de 30 segundos
-        faixas[i] = { musica, foto, trecho: achada && achada.previewUrl, botao, card: cards[i] }
+        // (a faixa fica no lugar atual do card, que muda se a música for arrastada)
+        const faixa = { musica, foto, trecho: achada && achada.previewUrl, botao, card: cards[i] }
+        faixas[[...listaMusicas.children].indexOf(cards[i])] = faixa
         if (achada && achada.previewUrl) {
-            botao.addEventListener("click", () => tocarFaixa(i))
+            botao.addEventListener("click", () => tocarFaixa(faixas.indexOf(faixa)))
         } else {
             botao.disabled = true
             botao.title = "Trecho não encontrado"
@@ -433,6 +438,167 @@ mini.querySelector(".mini-fechar").addEventListener("click", fecharTudo)
 document.addEventListener("keydown", (evento) => {
     if (evento.key === "Escape" && !tocador.hidden) minimizarTocador()
 })
+
+
+// ===== Extra do Matheus: arrastar as músicas para mudar a ordem =====
+// Segura a alça (6 pontinhos) e arrasta o card para cima ou para baixo; os outros abrem espaço.
+// Pelo teclado: foco na alça e setas para cima e para baixo.
+// A ordem nova vai para o backend (rota PUT /ordem), que guarda a posição de cada música no banco.
+
+let arrasto = null   // o card que está sendo arrastado e de onde ele saiu
+
+function idsNaTela() {
+    return [...listaMusicas.querySelectorAll(".musica")].map((card) => Number(card.dataset.id))
+}
+
+// Muda o card de lugar e faz os outros deslizarem até o lugar novo (em vez de pular)
+function moverCard(card, mudar) {
+    // Um card que muda de lugar na página recomeçaria a animação de entrada (e sumiria): ela sai
+    card.style.animation = "none"
+    card.classList.add("movido")   // a capa também não pisca (index.css)
+
+    const outros = [...listaMusicas.children].filter((outro) => outro !== card)
+    const antes = outros.map((outro) => outro.offsetTop)
+
+    mudar()
+
+    outros.forEach((outro, i) => {
+        const diferenca = antes[i] - outro.offsetTop
+        if (diferenca === 0) return
+        outro.style.transition = "none"
+        outro.style.transform = `translateY(${diferenca}px)`
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            outro.style.transition = "transform 0.3s var(--mola)"
+            outro.style.transform = ""
+        }))
+    })
+}
+
+// O card acompanha o dedo (ou o mouse) e troca de lugar quando passa do meio do vizinho
+function seguirDedo() {
+    const { card } = arrasto
+    const topo = arrasto.topoInicial + (arrasto.ultimoY + scrollY - arrasto.inicioY)
+    const meio = topo + card.offsetHeight / 2
+
+    let anterior = card.previousElementSibling
+    while (anterior && meio < anterior.offsetTop + anterior.offsetHeight / 2) {
+        const alvo = anterior
+        moverCard(card, () => alvo.before(card))
+        anterior = card.previousElementSibling
+    }
+
+    let proxima = card.nextElementSibling
+    while (proxima && meio > proxima.offsetTop + proxima.offsetHeight / 2) {
+        const alvo = proxima
+        moverCard(card, () => alvo.after(card))
+        proxima = card.nextElementSibling
+    }
+
+    card.style.transform = `translateY(${topo - card.offsetTop}px) scale(1.02)`
+}
+
+// Perto da borda de cima ou de baixo da tela, a página rola sozinha
+function rolarSozinho() {
+    if (!arrasto) return
+    const borda = 90
+    let passo = 0
+    if (arrasto.ultimoY < borda) passo = -Math.ceil((borda - arrasto.ultimoY) / 6)
+    if (arrasto.ultimoY > innerHeight - borda) passo = Math.ceil((arrasto.ultimoY - innerHeight + borda) / 6)
+    if (passo !== 0) {
+        scrollBy(0, passo)
+        seguirDedo()
+    }
+    arrasto.quadro = requestAnimationFrame(rolarSozinho)
+}
+
+listaMusicas.addEventListener("pointerdown", (evento) => {
+    const alca = evento.target.closest(".arrastar")
+    if (!alca || arrasto || evento.button !== 0) return
+    evento.preventDefault()
+
+    const card = alca.closest(".musica")
+    arrasto = {
+        card,
+        inicioY: evento.clientY + scrollY,
+        ultimoY: evento.clientY,
+        topoInicial: card.offsetTop,
+        ordemAntes: idsNaTela().join()
+    }
+    card.style.animation = "none"
+    card.style.transition = "none"
+    card.classList.add("arrastando")
+    listaMusicas.classList.add("ordenando")
+    arrasto.quadro = requestAnimationFrame(rolarSozinho)
+})
+
+// O movimento e o soltar são ouvidos na janela toda: o card muda de lugar na página durante o arrasto
+window.addEventListener("pointermove", (evento) => {
+    if (!arrasto) return
+    arrasto.ultimoY = evento.clientY
+    seguirDedo()
+})
+
+function soltar() {
+    if (!arrasto) return
+    const { card, ordemAntes, quadro } = arrasto
+    cancelAnimationFrame(quadro)
+    arrasto = null
+
+    card.style.transition = "transform 0.3s var(--mola)"
+    card.style.transform = ""
+    card.classList.remove("arrastando")
+    listaMusicas.classList.remove("ordenando")
+    setTimeout(() => { card.style.transition = "" }, 300)
+
+    if (idsNaTela().join() !== ordemAntes) ordemMudou()
+}
+
+window.addEventListener("pointerup", soltar)
+window.addEventListener("pointercancel", soltar)
+
+// Teclado: setas para cima e para baixo com o foco na alça
+listaMusicas.addEventListener("keydown", (evento) => {
+    const alca = evento.target.closest(".arrastar")
+    if (!alca || (evento.key !== "ArrowUp" && evento.key !== "ArrowDown")) return
+    evento.preventDefault()
+
+    const card = alca.closest(".musica")
+    const vizinho = evento.key === "ArrowUp" ? card.previousElementSibling : card.nextElementSibling
+    if (!vizinho) return
+
+    moverCard(card, () => {
+        if (evento.key === "ArrowUp") vizinho.before(card)
+        else vizinho.after(card)
+    })
+    alca.focus()
+    card.scrollIntoView({ block: "nearest", behavior: "smooth" })
+    ordemMudou()
+})
+
+// O tocador segue a ordem nova (próxima e anterior) e o banco guarda a ordem
+function ordemMudou() {
+    const tocando = faixas[atual]
+    const novas = [...listaMusicas.children].map((card) => faixas.find((faixa) => faixa && faixa.card === card))
+    faixas.length = 0
+    faixas.push(...novas)
+    atual = tocando ? faixas.indexOf(tocando) : -1
+
+    salvarOrdem(idsNaTela())
+}
+
+async function salvarOrdem(ids) {
+    try {
+        const resposta = await fetch(`${urlBackend}/ordem`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ids })
+        })
+        if (!resposta.ok) throw new Error(`O backend respondeu ${resposta.status}`)
+    } catch (error) {
+        console.log(error)
+        await avisar("Não deu para salvar a nova ordem. Tente de novo.")
+    }
+}
 
 
 // ===== Extra do Matheus: a abertura só aparece quando o site é aberto =====
